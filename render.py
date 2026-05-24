@@ -22,6 +22,7 @@ def drawScreen(grid_size,surface):
 
 
 #Render Functions
+
 def render_field(surface, grid_size): 
     pygame.draw.rect(surface, "#0f240a", (grid_size[0], grid_size[1], grid_size[2], grid_size[3])) #Outline
     pygame.draw.rect(surface, "#3f782f", (grid_size[0]+5, grid_size[1]+5, grid_size[2]-10, grid_size[3]-10)) #Grass Field for the Bins
@@ -37,7 +38,7 @@ def renderBush(bush,grid,surface):   #Bush is an objet of the class bush(see cre
 def renderFruits(bush, grid, surface):
     i = 0
     while i < bush.fruits:
-        fruit_x = grid[0] + bush.position[0] + bush_radius * math.sin(i * math.pi / 2)    #Dependin on i,the position chagnes 45º around the bush
+        fruit_x = grid[0] + bush.position[0] + bush_radius * math.sin(i * math.pi / 2)    #Depending on i,the position changes 45º around the bush
         fruit_y = grid[1] + bush.position[1] + bush_radius * math.cos(i * math.pi / 2)
 
         pygame.draw.circle(surface, "#702d09", (fruit_x, fruit_y), fruits_radius)#outline

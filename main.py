@@ -27,7 +27,7 @@ import render
 #	-Graphs
 #	-Representation of Populataion
 
-creatures.inicializeBushes(200)
+creatures.inicializeBushes(state.BUSH_AMOUNT)
 
 
 # pygame setup

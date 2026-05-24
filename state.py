@@ -9,11 +9,16 @@ GRID_HEIGTH = 610
 GRID_SIZE = (GRID_X, GRID_Y, GRID_WIDTH, GRID_HEIGTH)
 
 
-#bush constans
-
+#bush constants
 BUSH_RADIUS = 6
 FRUITS_RADIUS = 3
 
 MIN_GROWTH_TIME = 900
 MAX_GROWTH_TIME = 2400
 MAX_FRUITS = 4
+
+#Bins Constants
+
+
+#Simulation Constants
+BUSH_AMOUNT = 200
