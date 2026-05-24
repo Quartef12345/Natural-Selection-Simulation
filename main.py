@@ -28,7 +28,7 @@ import render
 #	-Representation of Populataion
 
 creatures.inicializeBushes(state.BUSH_AMOUNT)
-creatures.inicializeBins(state.STARTING_AMOUNT)
+creatures.inicializeBins(state.STARTING_BIN_AMOUNT)
 
 # pygame setup
 pygame.init()
