@@ -31,18 +31,45 @@ def bushes_tick(bush_array):
                 bush.fruits += 1
     
 
+def generateName():
+    name = "bin" + random.choice(state.BIN_NAMES)
+    return name
 
+class Bin:
+    def __init__(self, position):
+        self.position = position
+        self.direction = (0,0)
+        self.energy = state.STARTING_ENERGY
+        self.speed = state.STARTING_SPEED
+        self.mutation_chance = state.MUTATION_CHANCE
+        self.name = generateName()
 
 
 bins_array = []
 
-bin = {
-    "name": "Binnob",
-    "energy": 15,
-    "speed": 15,
-    "position": (0,0),
-    "velocity": (0,0)
-}
+def inicializeBins(nr_of_bins):
+    i = 0
+    while i < nr_of_bins:
+        a = random.randint(1,2)# a determines if the bin will vary in the x value, or the y value 
+        #if a = 1 then the bin will vary in the x axis, but be stuck at the edges of the field
+
+        b = random.randint(1,2)# b determins if the bin will vary in the upper/left or downer/rigth part of the edge
+
+        if a == 1:
+            x = random.randrange(state.GRID_WIDTH)
+            if b == 1:                                      
+                y = 0
+            else:
+                y = state.GRID_HEIGTH
+            bins_array.append(Bin((x,y)))
+        else:
+            y = random.randrange(state.GRID_HEIGTH)
+            if b == 1:
+                x = 0
+            else:
+                x = state.GRID_WIDTH
+            bins_array.append(Bin((x,y)))
+        i += 1
 
 
 
