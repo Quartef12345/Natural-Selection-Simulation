@@ -1,5 +1,5 @@
 import random
-
+import math
 
 import state
 
@@ -41,9 +41,37 @@ class Bin:
         self.direction = (0,0)
         self.energy = state.STARTING_ENERGY
         self.speed = state.STARTING_SPEED
+        self.awareness = state.STARTING_AWARENESS
         self.mutation_chance = state.MUTATION_CHANCE
         self.name = generateName()
+    def reproduce():
+        pass
+    def move(self, bushes):
+        #(x-h)^2+(y-k)^2 < r^2
+        last_direction_magnitude = self.awareness
+        closest_bush_vector = None
 
+        for bush in bushes:     #It checks every bush to find the closest withing range
+            if (bush.position[0] - self.position[0])**2 + (bush.position[1] - self.position[1])**2 < self.awareness**2: #Checks, using the circle equation if the bush is within awareness
+                direction_vector = (bush.position[0] - self.position[0], bush.position[1] - self.position[1]) #vector pointing at bush
+                direction_magnitude = math.sqrt(direction_vector[0]**2 + direction_vector[1]**2)
+                if abs(last_direction_magnitude) > abs(direction_magnitude):      #checks if its the current closest bush
+                    closest_bush_vector = direction_vector              #if it is, then it gives the crow to that bush
+                    last_direction_magnitude = direction_magnitude
+        
+        
+        if(closest_bush_vector == None): #if it didnt find bushes, give a random direction(subject to change)
+            closest_bush_vector = (random.randrange(-10,10) + self.direction[0], random.randrange(-10,10) + self.direction[1])
+
+        
+        closest_bush_vector_magnitude = math.sqrt(closest_bush_vector[0]**2 + closest_bush_vector[1]**2)
+        if closest_bush_vector_magnitude == 0:      #Prevent Division by zero error
+            closest_bush_vector_magnitude += 0.01
+        closest_bush_vector = (closest_bush_vector[0]/closest_bush_vector_magnitude, closest_bush_vector[1]/closest_bush_vector_magnitude)      #normalzied direction
+
+        self.direction = closest_bush_vector
+        self.position = (self.direction[0] * self.speed + self.position[0], self.direction[1] * self.speed + self.position[1])
+        self.energy -= (self.speed ^ 2) * state.dt 
 
 bins_array = []
 
@@ -72,12 +100,14 @@ def inicializeBins(nr_of_bins):
         i += 1
 
 
-def binTick(bins_array):
+def binTick(bins_array, bush_array):
     for bin in bins_array:
         if bin.energy <= 0:
             bins_array.remove(bin)
-        elif bin.energy >= state.REPRODUCTION_THRESHOLD:
-            bin.reproduce()
+        #elif bin.energy >= state.REPRODUCTION_THRESHOLD:
+        #    bin.reproduce()
+        
+        bin.move(bush_array)
         
 
 

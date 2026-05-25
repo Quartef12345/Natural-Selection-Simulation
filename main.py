@@ -45,8 +45,6 @@ while running:
     state.dt = time.time() - last_dt
     last_dt = time.time()
 
-    print(state.dt)
-
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
@@ -56,7 +54,12 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
 
-    creatures.bushes_tick(creatures.bush_array)
+    creatures.bushesTick(creatures.bush_array)
+
+    creatures.binTick(creatures.bins_array, creatures.bush_array)
+    
+    
+    
     render.drawScreen(state.GRID_SIZE, screen)
 
 
