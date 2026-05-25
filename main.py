@@ -1,4 +1,5 @@
 import pygame
+import time
 
 import state
 import creatures
@@ -36,10 +37,16 @@ screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
 
-
+last_dt = time.time()
 
 
 while running:
+
+    state.dt = time.time() - last_dt
+    last_dt = time.time()
+
+    print(state.dt)
+
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
@@ -56,7 +63,7 @@ while running:
     # flip() the display to put your work on screen
     pygame.display.flip()
 
-    clock.tick(240)  # limits FPS to 60
+    clock.tick(120)  # limits FPS to 120
 
 pygame.quit()
 

@@ -21,10 +21,10 @@ def inicializeBushes(nr_of_bushes):
         bush_array.append(Bush((random.randrange(40,state.GRID_WIDTH-40), random.randrange(40,state.GRID_HEIGTH-40))))#puts the bush in a random postition betwen the edgeds of the grid
         i += 1
 
-def bushes_tick(bush_array):
+def bushesTick(bush_array):
     for bush in bush_array:
         if(bush.fruits < bush.max_fruits):
-            bush.timer += 1 #the time cotnrls when the next fruit grows
+            bush.timer += state.dt #the time cotnrls when the next fruit grows
             if bush.timer >= bush.growth_time:
                 bush.timer = 0
                 bush.growth_time = random.randint(bush.min_growth_time, bush.max_growth_time) #make a new qouta, for the timer to reach
@@ -49,7 +49,7 @@ bins_array = []
 
 def inicializeBins(nr_of_bins):
     i = 0
-    while i < nr_of_bins:
+    while i < nr_of_bins:   #Bins only spawn in the edge of the world
         a = random.randint(1,2)# a determines if the bin will vary in the x value, or the y value 
         #if a = 1 then the bin will vary in the x axis, but be stuck at the edges of the field
 
@@ -70,6 +70,15 @@ def inicializeBins(nr_of_bins):
                 x = state.GRID_WIDTH
             bins_array.append(Bin((x,y)))
         i += 1
+
+
+def binTick(bins_array):
+    for bin in bins_array:
+        if bin.energy <= 0:
+            bins_array.remove(bin)
+        elif bin.energy >= state.REPRODUCTION_THRESHOLD:
+            bin.reproduce()
+        
 
 
 
