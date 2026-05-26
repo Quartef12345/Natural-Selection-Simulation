@@ -39,6 +39,9 @@ class Bin:
     def __init__(self, position):
         self.position = position
         self.direction = (0,0)
+        self.min_boring_timer = state.MIN_BORING_TIMER
+        self.max_boring_timer = state.MAX_BORING_TIMER
+        self.boring_timer = random.uniform(self.min_boring_timer, self.max_boring_timer)
         self.energy = state.STARTING_ENERGY
         self.speed = state.STARTING_SPEED
         self.awareness = state.STARTING_AWARENESS
@@ -56,12 +59,12 @@ class Bin:
                 direction_vector = (bush.position[0] - self.position[0], bush.position[1] - self.position[1]) #vector pointing at bush
                 direction_magnitude = math.sqrt(direction_vector[0]**2 + direction_vector[1]**2)
                 if abs(last_direction_magnitude) > abs(direction_magnitude):      #checks if its the current closest bush
-                    closest_bush_vector = direction_vector              #if it is, then it gives the crow to that bush
+                    closest_bush_vector = direction_vector              #if it is, then it gives the crown to that bush
                     last_direction_magnitude = direction_magnitude
         
         
         if(closest_bush_vector == None): #if it didnt find bushes, give a random direction(subject to change)
-            closest_bush_vector = (random.randrange(-10,10) + self.direction[0], random.randrange(-10,10) + self.direction[1])
+            closest_bush_vector = self.randomDirection()
 
         
         closest_bush_vector_magnitude = math.sqrt(closest_bush_vector[0]**2 + closest_bush_vector[1]**2)
@@ -71,7 +74,30 @@ class Bin:
 
         self.direction = closest_bush_vector
         self.position = (self.direction[0] * self.speed + self.position[0], self.direction[1] * self.speed + self.position[1])
-        self.energy -= (self.speed ^ 2) * state.dt 
+        self.energy -= (self.speed ^ 2) * state.dt
+    def randomDirection(self):                  #If boring timer is 0, then the bin changes it direction for a random peridof of time, unitl it gets bored again
+        if self.boring_timer <= 0:
+            random_direction = (random.randrange(-100,100) + self.direction[0], random.randrange(-100,100) + self.direction[1])
+            self.boring_timer = random.uniform(self.min_boring_timer, self.max_boring_timer)
+        else:
+            self.boring_timer -= state.dt           #while traveling one way, the direction gets small fluctuations because it looks better
+            random_direction = (self.direction[0] + random.uniform(-0.1, 0.1), self.direction[1] + random.uniform(-0.1, 0.1))
+
+        self.checkBorders()
+
+        return random_direction
+    def checkBorders(self):                                         #Makes bin stay in the border, and not pass trougth it
+        if self.position[0] <= 0:
+            self.position = (0, self.position[1])
+        elif self.position[0] >= state.GRID_WIDTH:
+            self.position = (state.GRID_WIDTH, self.position[1])
+        if self.position[1] <= 0:
+            self.position = (self.position[0], 0)
+        elif self.position[1] >= state.GRID_HEIGTH:
+            self.position = (self.position[0], state.GRID_HEIGTH)
+
+
+
 
 bins_array = []
 

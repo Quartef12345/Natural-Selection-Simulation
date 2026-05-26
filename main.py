@@ -54,6 +54,7 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
 
+
     creatures.bushesTick(creatures.bush_array)
 
     creatures.binTick(creatures.bins_array, creatures.bush_array)
