@@ -20,6 +20,7 @@ def drawScreen(grid_size,surface):
     for bush in bushes:
         renderBush(bush, grid_size, surface)
         renderFruits(bush, grid_size, surface)
+    renderUtilities(bins, bushes, grid_size, surface)
 
 
 
@@ -37,6 +38,11 @@ def renderBins(bin,grid,surface):
 def renderBush(bush,grid,surface):   #Bush is an objet of the class bush(see creatures), grid is the grid info(currently only size), surface is the pygam surface
     pygame.draw.circle(surface, "#123020", (grid[0] + bush.position[0], grid[1] + bush.position[1]), bush_radius)#outline
     pygame.draw.circle(surface, "#28c76f", (grid[0] + bush.position[0], grid[1] + bush.position[1]), bush_radius*0.9)#center
+
+def renderUtilities(bins, bushes, grid, surface):
+    if state.RENDER_AWARENESS:
+        for bin in bins:
+            pygame.draw.circle(surface, "#FFFFFF", (grid[0] + bin.position[0], grid[1] + bin.position[1]), state.STARTING_AWARENESS, 1)
 
 def renderFruits(bush, grid, surface):
     i = 0

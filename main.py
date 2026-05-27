@@ -56,12 +56,11 @@ while running:
 
 
     creatures.bushesTick(creatures.bush_array)
-
     creatures.binTick(creatures.bins_array, creatures.bush_array)
-    
-    
-    
+
     render.drawScreen(state.GRID_SIZE, screen)
+
+    bin = creatures.bins_array[0]
 
 
     # flip() the display to put your work on screen
