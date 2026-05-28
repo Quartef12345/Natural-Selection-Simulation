@@ -1,5 +1,9 @@
-#Constants
+#Simulator Variables
 dt = 1
+x = 1280
+y = 720
+
+
 
 #Grid constants
 GRID_X = 50
@@ -9,7 +13,9 @@ GRID_HEIGTH = 610
 GRID_SIZE = (GRID_X, GRID_Y, GRID_WIDTH, GRID_HEIGTH)
 
 #Render Options
-RENDER_AWARENESS = True
+RENDER_AWARENESS = False
+RENDER_ENERGY = False
+RENDER_NAMES = False
 
 #bush constants
 BUSH_RADIUS = 6
@@ -18,6 +24,7 @@ FRUITS_RADIUS = 3
 MIN_GROWTH_TIME = 9
 MAX_GROWTH_TIME = 24
 MAX_FRUITS = 4
+ENERGY_PER_FRUIT = 15
 
 #Bins Constants
 
@@ -69,4 +76,4 @@ REPRODUCTION_THRESHOLD = 500
 
 #Simulation Constants
 BUSH_AMOUNT = 40
-STARTING_BIN_AMOUNT = 6
+STARTING_BIN_AMOUNT = 30

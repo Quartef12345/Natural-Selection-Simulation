@@ -32,7 +32,7 @@ def bushesTick(bush_array):
     
 
 def generateName():
-    name = "bin" + random.choice(state.BIN_NAMES)
+    name = "Bin" + random.choice(state.BIN_NAMES)
     return name
 
 class Bin:
@@ -82,10 +82,10 @@ class Bin:
         
         self.checkBorders()
 
-        if fruited_bush != None:
+        if fruited_bush != None:        #Checks if bin is in "range" to eat fruit
             if ((fruited_bush.position[0]  > self.position[0] - 3) and (fruited_bush.position[0]  < self.position[0] + 3)) and ((fruited_bush.position[1]  > self.position[1] - 3) and (fruited_bush.position[1]  < self.position[1] + 3)):
                 fruited_bush.fruits -= 1
-                self.energy += 50
+                self.energy += state.ENERGY_PER_FRUIT
 
 
 
@@ -98,7 +98,7 @@ class Bin:
             self.boring_timer = 0
 
         if self.boring_timer <= 0:
-            if self.position[0] < state.GRID_X + 30:
+            if self.position[0] < state.GRID_X + 30:        #Logic to make bins nto get stuck on edges
                 x = abs(random.randrange(-100,100))
             elif self.position[0] > state.GRID_WIDTH - 30:
                 x = -abs(random.randrange(-100,100))

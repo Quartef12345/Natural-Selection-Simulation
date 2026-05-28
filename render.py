@@ -11,6 +11,18 @@ fruits_radius = state.FRUITS_RADIUS
 bins = creatures.bins_array
 bins_radius = state.BIN_RADIUS
 
+
+pygame.font.init()
+display_surface = pygame.display.set_mode((state.x, state.y))
+
+# set the pygame window name
+pygame.display.set_caption('Show Text')
+
+grid_font = pygame.font.Font('freesansbold.ttf', 15)
+
+
+
+
 #Render Main
 def drawScreen(grid_size,surface):
     surface.fill("#1f304d")
@@ -21,7 +33,6 @@ def drawScreen(grid_size,surface):
         renderBush(bush, grid_size, surface)
         renderFruits(bush, grid_size, surface)
     renderUtilities(bins, bushes, grid_size, surface)
-
 
 
 
@@ -40,9 +51,21 @@ def renderBush(bush,grid,surface):   #Bush is an objet of the class bush(see cre
     pygame.draw.circle(surface, "#28c76f", (grid[0] + bush.position[0], grid[1] + bush.position[1]), bush_radius*0.9)#center
 
 def renderUtilities(bins, bushes, grid, surface):
-    if state.RENDER_AWARENESS:
+
         for bin in bins:
-            pygame.draw.circle(surface, "#FFFFFF", (grid[0] + bin.position[0], grid[1] + bin.position[1]), state.STARTING_AWARENESS, 1)
+            if state.RENDER_AWARENESS:
+                pygame.draw.circle(surface, "#FFFFFF", (grid[0] + bin.position[0], grid[1] + bin.position[1]), state.STARTING_AWARENESS, 1)
+            if state.RENDER_ENERGY:
+                energy_text = grid_font.render(f"{math.floor(bin.energy)}", True, "#FFFFFF")
+                energy_surface = energy_text.get_rect()
+                energy_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] + state.BIN_RADIUS*1.5)
+                surface.blit(energy_text, energy_surface)
+            if state.RENDER_NAMES:
+                name_text = grid_font.render(f"{bin.name}", True, "#FFFFFF")
+                name_surface = name_text.get_rect()
+                name_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] - state.BIN_RADIUS*1.5)
+                surface.blit(name_text, name_surface)
+
 
 def renderFruits(bush, grid, surface):
     i = 0

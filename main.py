@@ -1,6 +1,5 @@
 import pygame
 import time
-
 import state
 import creatures
 import render
@@ -28,14 +27,16 @@ import render
 #	-Graphs
 #	-Representation of Populataion
 
+pygame.init()
+screen = pygame.display.set_mode((state.x, state.y))
+clock = pygame.time.Clock()
+running = True
+
 creatures.inicializeBushes(state.BUSH_AMOUNT)
 creatures.inicializeBins(state.STARTING_BIN_AMOUNT)
 
 # pygame setup
-pygame.init()
-screen = pygame.display.set_mode((1280, 720))
-clock = pygame.time.Clock()
-running = True
+
 
 last_dt = time.time()
 
