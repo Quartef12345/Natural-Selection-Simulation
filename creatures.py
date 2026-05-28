@@ -37,18 +37,25 @@ def generateName():
 
 class Bin:
     def __init__(self, position):
+        self.name = generateName()
         self.position = position
         self.direction = (0,0)
         self.min_boring_timer = state.MIN_BORING_TIMER
         self.max_boring_timer = state.MAX_BORING_TIMER
         self.boring_timer = random.uniform(self.min_boring_timer, self.max_boring_timer)
         self.energy = state.STARTING_ENERGY
+        self.rawEnergy = 0
+
         self.speed = state.STARTING_SPEED
         self.awareness = state.STARTING_AWARENESS
-        self.mutation_chance = state.MUTATION_CHANCE
-        self.name = generateName()
-    def reproduce():
-        pass
+    def reproduce(self):
+        bins_array.append(Bin((self.position[0], self.position[1])))
+        self.energy -= state.REPRODUCTION_PENALTY
+
+    def digest(self):       #Funstion to detemrine the difesting energy of createures, the higher the metabolism he fatse rcretuers get usable energy, but the less efficient it is
+        usedEnergy = self.metabolism * state.dt
+        self.energy += usedEnergy * 1/(self.metabolism + 1)
+        self.rawEnergy -= usedEnergy
 
     def move(self, bushes):
         #(x-h)^2+(y-k)^2 < r^2
@@ -85,7 +92,7 @@ class Bin:
         if fruited_bush != None:        #Checks if bin is in "range" to eat fruit
             if ((fruited_bush.position[0]  > self.position[0] - 3) and (fruited_bush.position[0]  < self.position[0] + 3)) and ((fruited_bush.position[1]  > self.position[1] - 3) and (fruited_bush.position[1]  < self.position[1] + 3)):
                 fruited_bush.fruits -= 1
-                self.energy += state.ENERGY_PER_FRUIT
+                self.rawEnergy += state.ENERGY_PER_FRUIT
 
 
 
@@ -165,8 +172,8 @@ def binTick(bins_array, bush_array):
     for bin in bins_array:
         if bin.energy <= 0:
             bins_array.remove(bin)
-        #elif bin.energy >= state.REPRODUCTION_THRESHOLD:
-        #    bin.reproduce()
+        elif bin.energy >= state.REPRODUCTION_THRESHOLD:
+            bin.reproduce()
         
         bin.move(bush_array)
         
