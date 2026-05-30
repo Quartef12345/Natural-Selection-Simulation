@@ -75,12 +75,25 @@ def renderUtilities(bins, bushes, grid, surface):
             if state.RENDER_AWARENESS:
                 pygame.draw.circle(surface, "#FFFFFF", (grid[0] + bin.position[0], grid[1] + bin.position[1]), state.STARTING_AWARENESS, 1)
             if state.RENDER_ENERGY:
-                energy_text = grid_font.render(f"{math.floor(bin.energy)}", True, "#FFFFFF")
+                energy_text = grid_font.render(f"{math.floor(bin.energy)}", True, "#1A9A1A")
                 energy_surface = energy_text.get_rect()
                 energy_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] + state.BIN_RADIUS*5)
                 surface.blit(energy_text, energy_surface)
+            if state.RENDER_RAW_ENERGY:
+                rawn_energy_text = grid_font.render(f"{math.floor(bin.raw_energy)}", True, "#9A1A1A")
+                rawn_energy_surface = rawn_energy_text.get_rect()
+                rawn_energy_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] + state.BIN_RADIUS*10)
+                surface.blit(rawn_energy_text, rawn_energy_surface)
             if state.RENDER_NAMES:
                 name_text = grid_font.render(f"{bin.name}", True, "#FFFFFF")
                 name_surface = name_text.get_rect()
                 name_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] - state.BIN_RADIUS*3)
                 surface.blit(name_text, name_surface)
+            if state.RENDER_AGE:
+                age_text = grid_font.render(f"{round(bin.age, 1)}", True, "#FFFFFF")
+                age_surface = age_text.get_rect()
+                if state.RENDER_NAMES:
+                    age_surface.center = (bin.position[0] + grid[0] + 30, bin.position[1] + grid[1] - state.BIN_RADIUS*3)
+                else:
+                    age_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] - state.BIN_RADIUS*3)
+                surface.blit(age_text, age_surface)

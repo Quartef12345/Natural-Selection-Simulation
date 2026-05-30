@@ -37,14 +37,21 @@ def generateName():
 
 class Bin:
     def __init__(self, position):
+        #Identity Variables
         self.name = generateName()
+        self.age = 0
+
+        #Movement Variables
         self.position = position
         self.direction = (0,0)
         self.min_boring_timer = state.MIN_BORING_TIMER
         self.max_boring_timer = state.MAX_BORING_TIMER
         self.boring_timer = random.uniform(self.min_boring_timer, self.max_boring_timer)
+
+        #Energy Varaibles
         self.energy = state.STARTING_ENERGY
-        self.rawEnergy = 0
+        self.raw_energy = 0
+        self.metabolism = state.STARTING_METABOLISM
 
         self.speed = state.STARTING_SPEED
         self.awareness = state.STARTING_AWARENESS
@@ -53,9 +60,12 @@ class Bin:
         self.energy -= state.REPRODUCTION_PENALTY
 
     def digest(self):       #Funstion to detemrine the difesting energy of createures, the higher the metabolism he fatse rcretuers get usable energy, but the less efficient it is
-        usedEnergy = self.metabolism * state.dt
-        self.energy += usedEnergy * 1/(self.metabolism + 1)
-        self.rawEnergy -= usedEnergy
+        if(self.raw_energy > 0):
+            tranforming_energy = self.metabolism * state.dt
+            if(tranforming_energy > self.raw_energy):
+                tranforming_energy = self.raw_energy
+            self.energy += tranforming_energy * 1/(self.metabolism*0.2 + 1)
+            self.raw_energy -= tranforming_energy
 
     def move(self, bushes):
         #(x-h)^2+(y-k)^2 < r^2
@@ -63,15 +73,16 @@ class Bin:
         closest_bush_vector = None
         fruited_bush = None
 
-        for bush in bushes:     #It checks every bush to find the closest withing range
-            if(bush.fruits > 0):
-                if (bush.position[0] - self.position[0])**2 + (bush.position[1] - self.position[1])**2 < self.awareness**2: #Checks, using the circle equation if the bush is within awareness
-                    direction_vector = (bush.position[0] - self.position[0], bush.position[1] - self.position[1]) #vector pointing at bush
-                    direction_magnitude = math.sqrt(direction_vector[0]**2 + direction_vector[1]**2)
-                    if abs(last_direction_magnitude) > abs(direction_magnitude):      #checks if its the current closest bush
-                        closest_bush_vector = direction_vector              #if it is, then it gives the crown to that bush
-                        last_direction_magnitude = direction_magnitude
-                        fruited_bush = bush
+        if(self.raw_energy <= 30):
+            for bush in bushes:     #It checks every bush to find the closest withing range
+                if(bush.fruits > 0):
+                    if (bush.position[0] - self.position[0])**2 + (bush.position[1] - self.position[1])**2 < self.awareness**2: #Checks, using the circle equation if the bush is within awareness
+                        direction_vector = (bush.position[0] - self.position[0], bush.position[1] - self.position[1]) #vector pointing at bush
+                        direction_magnitude = math.sqrt(direction_vector[0]**2 + direction_vector[1]**2)
+                        if abs(last_direction_magnitude) > abs(direction_magnitude):      #checks if its the current closest bush
+                            closest_bush_vector = direction_vector              #if it is, then it gives the crown to that bush
+                            last_direction_magnitude = direction_magnitude
+                            fruited_bush = bush
         
         
         if(closest_bush_vector == None): #if it didnt find bushes, give a random direction(subject to change)
@@ -85,17 +96,13 @@ class Bin:
 
         self.direction = closest_bush_vector
         self.position = (self.direction[0] * self.speed + self.position[0], self.direction[1] * self.speed + self.position[1])
-        self.energy -= (self.speed**2) * state.dt
         
         self.checkBorders()
 
         if fruited_bush != None:        #Checks if bin is in "range" to eat fruit
             if ((fruited_bush.position[0]  > self.position[0] - 3) and (fruited_bush.position[0]  < self.position[0] + 3)) and ((fruited_bush.position[1]  > self.position[1] - 3) and (fruited_bush.position[1]  < self.position[1] + 3)):
                 fruited_bush.fruits -= 1
-                self.rawEnergy += state.ENERGY_PER_FRUIT
-
-
-
+                self.raw_energy += state.ENERGY_PER_FRUIT
 
     def randomDirection(self):                  #If boring timer is 0, then the bin changes it direction for a random peridof of time, unitl it gets bored again
         if (self.position[0] < 10
@@ -170,10 +177,15 @@ def inicializeBins(nr_of_bins):
 
 def binTick(bins_array, bush_array):
     for bin in bins_array:
+        bin.age += state.dt
+        bin.digest()
+        
         if bin.energy <= 0:
             bins_array.remove(bin)
         elif bin.energy >= state.REPRODUCTION_THRESHOLD:
             bin.reproduce()
+
+        bin.energy -= ((bin.speed**2) + bin.metabolism/5 + bin.awareness/200) * state.dt
         
         bin.move(bush_array)
         

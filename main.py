@@ -61,9 +61,6 @@ while running:
 
     render.drawScreen(state.GRID_SIZE, screen)
 
-    bin = creatures.bins_array[0]
-
-
     # flip() the display to put your work on screen
     pygame.display.flip()
 
