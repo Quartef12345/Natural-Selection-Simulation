@@ -112,3 +112,8 @@ def renderUtilities(bins, bushes, grid, surface):
                 refractory_surface = refractory_text.get_rect()
                 refractory_surface.center = (bin.position[0] + grid[0] + state.BIN_RADIUS * 15, bin.position[1] + grid[1] + state.BIN_RADIUS * 8)
                 surface.blit(refractory_text, refractory_surface)
+
+                fertility_text = grid_font.render(f"{bin.fertility}", True, "#FFFFFF")
+                fertility_surface = fertility_text.get_rect()
+                fertility_surface.center = (bin.position[0] + grid[0] + state.BIN_RADIUS * 15, bin.position[1] + grid[1] + state.BIN_RADIUS * 14)
+                surface.blit(fertility_text, fertility_surface)
