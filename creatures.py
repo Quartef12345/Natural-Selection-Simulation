@@ -48,23 +48,62 @@ class Bin:
         self.max_boring_timer = state.MAX_BORING_TIMER
         self.boring_timer = random.uniform(self.min_boring_timer, self.max_boring_timer)
 
+        #Reproduction Variables
+        self.pregnant = False
+        self.reproductive_maturity = state.REPRODUCTIVE_MATURITY    #How old you must be to reproduce
+        self.gestation_period = state.GESTATION_PERIOD  #How long will the pregnancy take
+        self.refractory_period = state.REFRACTORY_PERIOD #How long until you can reproduce again
+        self.fertility = round((self.gestation_period + 0.0008 * (self.gestation_period - 120)**3)/500 + 2.76) #how many childer will you have, based on the gestation
+        self.speed_penalty_percentage = state.SPEED_PENALTY_PERCENTAGE
+        self.gestation_timer = 0
+        self.refractory_timer = state.REFRACTORY_PERIOD
+
+
         #Energy Varaibles
         self.energy = state.STARTING_ENERGY
         self.raw_energy = 0
         self.metabolism = state.STARTING_METABOLISM
 
+        #General Traits
         self.speed = state.STARTING_SPEED
         self.awareness = state.STARTING_AWARENESS
+
     def reproduce(self):
-        bins_array.append(Bin((self.position[0], self.position[1])))
-        self.energy -= state.REPRODUCTION_PENALTY
+
+        energy_for_pregnancy = self.gestation_period * 0.0006 + 100 #How much energy you use per child, based on gestaton period
+        if self.age >= self.reproductive_maturity and self.refractory_timer >= self.refractory_period and self.energy >= energy_for_pregnancy and self.pregnant == False:   #Every conditiion - Age; Refractory; Energy; not already pregnant
+                self.pregnant = True
+                self.speed *= (100 - self.speed_penalty_percentage)/100 #Changes speed to slower, due to pregnancy
+                self.gestation_timer = 0
+
+        if self.pregnant:
+            self.gestation_timer += state.dt
+            if self.gestation_timer >= self.gestation_period: #When the bin should be born
+                offspring_array = []
+
+                for i in range (self.fertility):        #Changes Bins stats(in future will have mutations and etc)
+                    offspring_array.append(Bin(self.position))
+                    offspring_array[i].energy = energy_for_pregnancy/self.fertility
+
+                self.pregnant = False
+                self.refractory_timer = 0
+                self.speed /= (100 - self.speed_penalty_percentage)/100 #Reputs the speed to normal
+
+                for bin in offspring_array: #Adds offsprings to the world
+                    bins_array.append(bin)
+
+                self.energy -= energy_for_pregnancy
+        else:
+            self.refractory_timer += state.dt
+                
 
     def digest(self):       #Funstion to detemrine the difesting energy of createures, the higher the metabolism he fatse rcretuers get usable energy, but the less efficient it is
-        if(self.raw_energy > 0):
+        if self.raw_energy > 0:
             tranforming_energy = self.metabolism * state.dt
-            if(tranforming_energy > self.raw_energy):
+            if tranforming_energy > self.raw_energy:   #Makes it so that raw energy can never go below zero
                 tranforming_energy = self.raw_energy
-            self.energy += tranforming_energy * 1/(self.metabolism*0.2 + 1)
+
+            self.energy += tranforming_energy * 1/(self.metabolism*0.03 + 1) #The bigger the metabolism, the less efficiently is the digestion
             self.raw_energy -= tranforming_energy
 
     def move(self, bushes):
@@ -73,7 +112,8 @@ class Bin:
         closest_bush_vector = None
         fruited_bush = None
 
-        if(self.raw_energy <= 30):
+        stomach_capacity = self.metabolism * 3
+        if(self.raw_energy <= stomach_capacity):
             for bush in bushes:     #It checks every bush to find the closest withing range
                 if(bush.fruits > 0):
                     if (bush.position[0] - self.position[0])**2 + (bush.position[1] - self.position[1])**2 < self.awareness**2: #Checks, using the circle equation if the bush is within awareness
@@ -176,19 +216,25 @@ def inicializeBins(nr_of_bins):
 
 
 def binTick(bins_array, bush_array):
+    dead_bins_array = []
     for bin in bins_array:
         bin.age += state.dt
         bin.digest()
-        
-        if bin.energy <= 0:
-            bins_array.remove(bin)
-        elif bin.energy >= state.REPRODUCTION_THRESHOLD:
-            bin.reproduce()
 
-        bin.energy -= ((bin.speed**2) + bin.metabolism/5 + bin.awareness/200) * state.dt
-        
+
+        bin.reproduce()
+
+
         bin.move(bush_array)
-        
 
+        offspring_cost = 0
+        if bin.pregnant:
+            offspring_cost = state.OFFSPRING_COST * bin.fertility
 
+        bin.energy -= ((bin.speed**2) + bin.metabolism/5 + bin.awareness/200 + offspring_cost) * state.dt        
+
+        if bin.energy <= 0 or bin.age >= 500:
+            dead_bins_array.append(bin)
+    for bin in dead_bins_array:
+        bins_array.remove(bin)
 

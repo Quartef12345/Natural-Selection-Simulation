@@ -87,13 +87,28 @@ def renderUtilities(bins, bushes, grid, surface):
             if state.RENDER_NAMES:
                 name_text = grid_font.render(f"{bin.name}", True, "#FFFFFF")
                 name_surface = name_text.get_rect()
-                name_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] - state.BIN_RADIUS*3)
+                name_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] - state.BIN_RADIUS*5)
                 surface.blit(name_text, name_surface)
             if state.RENDER_AGE:
                 age_text = grid_font.render(f"{round(bin.age, 1)}", True, "#FFFFFF")
                 age_surface = age_text.get_rect()
                 if state.RENDER_NAMES:
-                    age_surface.center = (bin.position[0] + grid[0] + 30, bin.position[1] + grid[1] - state.BIN_RADIUS*3)
+                    age_surface.center = (bin.position[0] + grid[0] + 30, bin.position[1] + grid[1] - state.BIN_RADIUS*5)
                 else:
-                    age_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] - state.BIN_RADIUS*3)
+                    age_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] - state.BIN_RADIUS*5)
                 surface.blit(age_text, age_surface)
+            if state.RENDER_HORMONES:
+                pregnant_text = grid_font.render(f"{bin.pregnant}", True, "#FF00BF")
+                pregnant_surface = pregnant_text.get_rect()
+                pregnant_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] + state.BIN_RADIUS*14)
+                surface.blit(pregnant_text, pregnant_surface)
+
+                gestation_text = grid_font.render(f"{round(bin.gestation_timer, 2)}/{bin.gestation_period}", True, "#FFFFFF")
+                gestation_surface = gestation_text.get_rect()
+                gestation_surface.center = (bin.position[0] + grid[0] + state.BIN_RADIUS * 10, bin.position[1] + grid[1] + state.BIN_RADIUS * 3)
+                surface.blit(gestation_text, gestation_surface)
+
+                refractory_text = grid_font.render(f"{round(bin.refractory_timer, 2)}/{bin.refractory_period}", True, "#FFFFFF")
+                refractory_surface = refractory_text.get_rect()
+                refractory_surface.center = (bin.position[0] + grid[0] + state.BIN_RADIUS * 15, bin.position[1] + grid[1] + state.BIN_RADIUS * 8)
+                surface.blit(refractory_text, refractory_surface)
