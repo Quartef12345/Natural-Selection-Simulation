@@ -79,7 +79,7 @@ def renderUtilities(bins, bushes, grid, surface):
                 energy_surface = energy_text.get_rect()
                 energy_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] + state.BIN_RADIUS*5)
                 surface.blit(energy_text, energy_surface)
-            if state.RENDER_RAW_ENERGY:
+
                 rawn_energy_text = grid_font.render(f"{math.floor(bin.raw_energy)}", True, "#9A1A1A")
                 rawn_energy_surface = rawn_energy_text.get_rect()
                 rawn_energy_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] + state.BIN_RADIUS*10)
@@ -89,13 +89,10 @@ def renderUtilities(bins, bushes, grid, surface):
                 name_surface = name_text.get_rect()
                 name_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] - state.BIN_RADIUS*5)
                 surface.blit(name_text, name_surface)
-            if state.RENDER_AGE:
+                
                 age_text = grid_font.render(f"{round(bin.age, 1)}", True, "#FFFFFF")
                 age_surface = age_text.get_rect()
-                if state.RENDER_NAMES:
-                    age_surface.center = (bin.position[0] + grid[0] + 30, bin.position[1] + grid[1] - state.BIN_RADIUS*5)
-                else:
-                    age_surface.center = (bin.position[0] + grid[0], bin.position[1] + grid[1] - state.BIN_RADIUS*5)
+                age_surface.center = (bin.position[0] + grid[0] + 30, bin.position[1] + grid[1] - state.BIN_RADIUS*5)
                 surface.blit(age_text, age_surface)
             if state.RENDER_HORMONES:
                 pregnant_text = grid_font.render(f"{bin.pregnant}", True, "#FF00BF")
@@ -117,3 +114,18 @@ def renderUtilities(bins, bushes, grid, surface):
                 fertility_surface = fertility_text.get_rect()
                 fertility_surface.center = (bin.position[0] + grid[0] + state.BIN_RADIUS * 15, bin.position[1] + grid[1] + state.BIN_RADIUS * 14)
                 surface.blit(fertility_text, fertility_surface)
+            if state.RENDER_GENES:
+                # 1. Format ALL genes to at max 3 decimal places, removing trailing zeros if they are integers
+                clean_floats = [f"{gene:.3f}".rstrip('0').rstrip('.') if '.' in f"{gene:.3f}" else f"{gene:.3f}" for gene in bin.genes]
+                
+                # 2. Join them with commas and wrap them in custom brackets so Python doesn't add quotes
+                genes_string = "[" + ", ".join(clean_floats) + "]"
+                
+                # 3. Render the clean string
+                genes_text = grid_font.render(f"Genes: {genes_string} from {bin.name}", True, "#FFFFFF")
+                genes_surface = genes_text.get_rect()
+                genes_surface.topleft = (grid[0] + grid[2] + 5, state.GRID_Y + 20 + 10 * bins.index(bin))
+                surface.blit(genes_text, genes_surface)
+
+
+                    

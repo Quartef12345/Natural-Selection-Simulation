@@ -11,7 +11,7 @@ class Bush:                         #Bushes, will allow bins to eat and gain ene
         self.timer = 0
         self.min_growth_time = state.MIN_GROWTH_TIME #the amount of time before a new fruit appears
         self.max_growth_time = state.MAX_GROWTH_TIME
-        self.growth_time = random.randint(self.min_growth_time, self.max_growth_time)
+        self.growth_time = random.uniform(self.min_growth_time, self.max_growth_time)
 
 bush_array = []
 
@@ -27,7 +27,7 @@ def bushesTick(bush_array):
             bush.timer += state.dt #the time cotnrls when the next fruit grows
             if bush.timer >= bush.growth_time:
                 bush.timer = 0
-                bush.growth_time = random.randint(bush.min_growth_time, bush.max_growth_time) #make a new qouta, for the timer to reach
+                bush.growth_time = random.uniform(bush.min_growth_time, bush.max_growth_time) #make a new qouta, for the timer to reach
                 bush.fruits += 1
     
 
@@ -36,23 +36,44 @@ def generateName():
     return name
 
 class Bin:
-    def __init__(self, position):
+    def __init__(self, position, genes=None):
         #Identity Variables
         self.name = generateName()
         self.age = 0
 
+        #Bin Genes
+        if( genes != None):
+            self.min_boring_timer = genes[0]
+            self.max_boring_timer = genes[1]
+
+            self.reproductive_maturity = genes[2]
+            self.gestation_period = genes[3]
+            self.refractory_period = genes[4]
+
+            self.metabolism = genes[5]
+            self.speed = genes[6]
+            self.awareness = genes[7]
+
+        else:
+            self.min_boring_timer = state.MIN_BORING_TIMER
+            self.max_boring_timer = state.MAX_BORING_TIMER
+
+            self.reproductive_maturity = state.REPRODUCTIVE_MATURITY    #How old you must be to reproduce
+            self.gestation_period = state.GESTATION_PERIOD  #How long will the pregnancy take
+            self.refractory_period = state.REFRACTORY_PERIOD #How long until you can reproduce again
+
+            self.metabolism = state.STARTING_METABOLISM
+            self.speed = state.STARTING_SPEED
+            self.awareness = state.STARTING_AWARENESS
+
+
         #Movement Variables
         self.position = position
         self.direction = (0,0)
-        self.min_boring_timer = state.MIN_BORING_TIMER
-        self.max_boring_timer = state.MAX_BORING_TIMER
         self.boring_timer = random.uniform(self.min_boring_timer, self.max_boring_timer)
 
         #Reproduction Variables
         self.pregnant = False
-        self.reproductive_maturity = state.REPRODUCTIVE_MATURITY    #How old you must be to reproduce
-        self.gestation_period = state.GESTATION_PERIOD  #How long will the pregnancy take
-        self.refractory_period = state.REFRACTORY_PERIOD #How long until you can reproduce again
         self.fertility = round((self.gestation_period + 0.0008 * (self.gestation_period - 120)**3)/500 + 2.76) #how many childer will you have, based on the gestation
         self.speed_penalty_percentage = state.SPEED_PENALTY_PERCENTAGE
         self.gestation_timer = 0
@@ -62,11 +83,14 @@ class Bin:
         #Energy Varaibles
         self.energy = state.STARTING_ENERGY
         self.raw_energy = 0
-        self.metabolism = state.STARTING_METABOLISM
 
-        #General Traits
-        self.speed = state.STARTING_SPEED
-        self.awareness = state.STARTING_AWARENESS
+
+
+
+        self.genes = [
+            self.min_boring_timer, self.max_boring_timer, #Movement Genes
+            self.reproductive_maturity, self.gestation_period, self.refractory_period, #Reproductive Genes
+            self.metabolism, self.speed, self.awareness] #Traits Genes
 
     def reproduce(self):
 
@@ -81,9 +105,18 @@ class Bin:
             if self.gestation_timer >= self.gestation_period: #When the bin should be born
                 offspring_array = []
 
-                for i in range (self.fertility):        #Changes Bins stats(in future will have mutations and etc)
-                    offspring_array.append(Bin(self.position))
+
+                for i in range (self.fertility):
+                    offspring_genes = []
+                    for u in range(len(self.genes)):
+                        if random.random() < state.MUTATION_CHANCE:
+                            offspring_genes.append(self.genes[u] * random.uniform(state.MIN_MUTATION_VARIANCE, state.MAX_MUTATION_VARIANCE))
+                        else:
+                            offspring_genes.append(self.genes[u])
+
+                    offspring_array.append(Bin(self.position, offspring_genes))
                     offspring_array[i].energy = energy_for_pregnancy/self.fertility
+
 
                 self.pregnant = False
                 self.refractory_timer = 0
