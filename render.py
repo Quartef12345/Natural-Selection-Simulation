@@ -71,6 +71,12 @@ def renderPanel(bins, bushes, grid, surface):
 
 def renderUtilities(bins, bushes, grid, surface):
 
+        average_genes = []
+
+        if len(bins) > 0:
+            for i in range(len(bins[0].genes)):
+                 average_genes.append(0)
+
         for bin in bins:
             if state.RENDER_AWARENESS:
                 pygame.draw.circle(surface, "#FFFFFF", (grid[0] + bin.position[0], grid[1] + bin.position[1]), state.STARTING_AWARENESS, 1)
@@ -126,6 +132,24 @@ def renderUtilities(bins, bushes, grid, surface):
                 genes_surface = genes_text.get_rect()
                 genes_surface.topleft = (grid[0] + grid[2] + 5, state.GRID_Y + 20 + 10 * bins.index(bin))
                 surface.blit(genes_text, genes_surface)
+
+            if state.RENDER_AVERAGE_GENES:
+                 for i in range(len(bin.genes)):
+                      average_genes[i] += bin.genes[i]
+
+        if state.RENDER_AVERAGE_GENES:
+                
+                for i in range(len(average_genes)):
+                     average_genes[i] = average_genes[i] / len(bins)
+                clean_floats = [f"{gene:.3f}".rstrip('0').rstrip('.') if '.' in f"{gene:.3f}" else f"{gene:.3f}" for gene in average_genes]
+
+                average_genes_string = "[" + ", ".join(clean_floats) + "]"
+                
+                # 3. Render the clean string
+                average_genes_text = grid_font.render(f"Average Genes: {average_genes_string}", True, "#FFFFFF")
+                average_genes_surface = average_genes_text.get_rect()
+                average_genes_surface.topleft = (grid[0] + grid[2] + 5, state.GRID_Y + 20)
+                surface.blit(average_genes_text, average_genes_surface)
 
 
                     
