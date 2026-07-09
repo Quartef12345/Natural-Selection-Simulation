@@ -4,11 +4,11 @@ import math
 import creatures
 import state
 
-bushes = creatures.bush_array #the array of the bushes objects
+bushes = state.bush_array #the array of the bushes objects
 bush_radius = state.BUSH_RADIUS
 fruits_radius = state.FRUITS_RADIUS
 
-bins = creatures.bins_array
+bins = state.bins_array
 bins_radius = state.BIN_RADIUS
 
 

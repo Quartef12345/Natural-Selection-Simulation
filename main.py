@@ -56,8 +56,8 @@ while running:
                 running = False
 
 
-    creatures.bushesTick(creatures.bush_array)
-    creatures.binTick(creatures.bins_array, creatures.bush_array)
+    creatures.bushesTick(state.bush_array)
+    creatures.binTick(state.bins_array, state.bush_array)
 
     render.drawScreen(state.GRID_SIZE, screen)
 
