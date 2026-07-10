@@ -78,9 +78,9 @@ class Bin:
                 offspring_array = []
 
 
-                for i in range (self.fertility):
+                for i in range (self.fertility):    #for each offpsring
                     offspring_genes = []
-                    for u in range(len(self.genes)):
+                    for u in range(len(self.genes)):                    #add small mutation
                         if random.random() < state.MUTATION_CHANCE:
                             offspring_genes.append(self.genes[u] * random.uniform(state.MIN_MUTATION_VARIANCE, state.MAX_MUTATION_VARIANCE))
                         else:
@@ -102,7 +102,7 @@ class Bin:
             self.refractory_timer += state.dt
                 
 
-    def digest(self):       #Funstion to detemrine the difesting energy of createures, the higher the metabolism he fatse rcretuers get usable energy, but the less efficient it is
+    def digest(self):       #Function to determine the digesting energy of createures, the higher the metabolism he faster creaturs get usable energy, but the less efficient it is
         if self.raw_energy > 0:
             tranforming_energy = self.metabolism * state.dt
             if tranforming_energy > self.raw_energy:   #Makes it so that raw energy can never go below zero

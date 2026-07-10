@@ -12,6 +12,8 @@ class Graph:
         self.y_name = y_name
         self.axis_offset = 14
 
+        self.active = False
+
 
     def draw(self):
         surface = self.surface
@@ -20,18 +22,27 @@ class Graph:
         y_name = self.y_name
         axis_offset = self.axis_offset
 
-        pygame.draw.rect(surface, "#FFFFFF", (position[0], position[1], position[2], position[3])) #Background
+        if self.active:
 
-        pygame.draw.line(surface, "#000000", (position[0] + axis_offset, position[1] + position[3] - axis_offset), (position[0] + position[2],  position[1] + position[3] - axis_offset)) # X Axis
-        pygame.draw.line(surface, "#000000", (position[0] + axis_offset, position[1]), (position[0] + axis_offset,  position[1] + position[3] - axis_offset)) # Y Axis
+            pygame.draw.rect(surface, "#FFFFFF", (position[0], position[1], position[2], position[3])) #Background
 
-        x_aixs_text = axis_font.render(f"{x_name}", True, "#000000")
-        x_axis_surface = x_aixs_text.get_rect()
-        x_axis_surface.bottomright = (position[0] + position[2], position[1] + position[3])
-        surface.blit(x_aixs_text, x_axis_surface)
+            pygame.draw.line(surface, "#000000", (position[0] + axis_offset, position[1] + position[3] - axis_offset), (position[0] + position[2],  position[1] + position[3] - axis_offset)) # X Axis
+            pygame.draw.line(surface, "#000000", (position[0] + axis_offset, position[1]), (position[0] + axis_offset,  position[1] + position[3] - axis_offset)) # Y Axis
 
-        y_aixs_text = axis_font.render(f"{y_name}", True, "#000000")
-        y_axis_surface = y_aixs_text.get_rect()
-        y_axis_surface.topleft = (position[0], position[1])
-        surface.blit(y_aixs_text, y_axis_surface)
+            x_aixs_text = axis_font.render(f"{x_name}", True, "#000000")
+            x_axis_surface = x_aixs_text.get_rect()
+            x_axis_surface.bottomright = (position[0] + position[2], position[1] + position[3])
+            surface.blit(x_aixs_text, x_axis_surface)
+
+            y_axis_text_horizontal = axis_font.render(f"{y_name}", True, "#000000")
+            y_axis_text = pygame.transform.rotate(y_axis_text_horizontal, 90)
+            y_axis_surface = y_axis_text.get_rect()
+            y_axis_surface.topleft = (position[0] + 2, position[1])
+            surface.blit(y_axis_text, y_axis_surface)
+    
+    def show(self):
+        self.active = True
+    def hide(self):
+        self.active = False
+        
 

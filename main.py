@@ -5,28 +5,6 @@ import creatures
 import render
 import graphs
 
-
-#Creatures
-#	-Traits
-#		-Speed
-#			-How fast it moves
-#	-Stats
-#		-Energy
-#			-Uses energy to walk, more speed more energy
-#			-It collect fruits from the ground
-#		-Reproduceness
-#	-Die and be Born and Reproduce
-#		- Die if energy less than x
-#		- Reproduce if energy more than y for z seconds
-#	-Random chance of altering sligtly a value on birth (Mutations)
-
-#Enviroment
-#	-Resources - Food
-
-# Display
-#	-Graphs
-#	-Representation of Populataion
-
 pygame.init()
 screen = pygame.display.set_mode((state.x, state.y))
 clock = pygame.time.Clock()
@@ -41,6 +19,11 @@ creatures.inicializeBins(state.STARTING_BIN_AMOUNT)
 last_dt = time.time()
 
 graph = graphs.Graph(screen, [200,200,400,220], "Tick", "Population")
+graph.show()
+
+graph2 = graphs.Graph(screen, [800,200, 400, 220], "Tick", "Max Pop")
+graph2.show()
+
 while running:
 
     state.dt = time.time() - last_dt
@@ -62,6 +45,7 @@ while running:
     #render.drawScreen(state.GRID_SIZE, screen)
     screen.fill("#1f304d")
     graph.draw()
+    graph2.draw()
 
     # flip() the display to put your work on screen
     pygame.display.flip()

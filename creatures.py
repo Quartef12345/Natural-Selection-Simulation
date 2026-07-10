@@ -52,22 +52,22 @@ def binTick(bins_array, bush_array):
     dead_bins_array = []
     for bin in bins_array:
         bin.age += state.dt
+
+
         bin.digest()
-
-
         bin.reproduce()
-
-
         bin.move(bush_array)
 
-        offspring_cost = 0
+
+        offspring_cost = 0  #calculates energy of pregnancy
         if bin.pregnant:
             offspring_cost = state.OFFSPRING_COST * bin.fertility
 
-        bin.energy -= ((bin.speed**2) + bin.metabolism/5 + bin.awareness/200 + offspring_cost) * state.dt        
+        bin.energy -= ((bin.speed**2) + bin.metabolism/5 + bin.awareness/200 + offspring_cost) * state.dt        #total energy consumption
 
-        if bin.energy <= 0 or bin.age >= 500:
+        if bin.energy <= 0 or bin.age >= 500:#makes a list of dead bins
             dead_bins_array.append(bin)
+    
     for bin in dead_bins_array:
-        bins_array.remove(bin)
+        bins_array.remove(bin)  #removes dead bins
 

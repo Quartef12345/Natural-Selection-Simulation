@@ -120,13 +120,8 @@ def renderUtilities(bins, bushes, grid, surface):
                 fertility_surface.center = (bin.position[0] + grid[0] + state.BIN_RADIUS * 15, bin.position[1] + grid[1] + state.BIN_RADIUS * 14)
                 surface.blit(fertility_text, fertility_surface)
             if state.RENDER_GENES:
-                # 1. Format ALL genes to at max 3 decimal places, removing trailing zeros if they are integers
                 clean_floats = [f"{gene:.3f}".rstrip('0').rstrip('.') if '.' in f"{gene:.3f}" else f"{gene:.3f}" for gene in bin.genes]
-                
-                # 2. Join them with commas and wrap them in custom brackets so Python doesn't add quotes
                 genes_string = "[" + ", ".join(clean_floats) + "]"
-                
-                # 3. Render the clean string
                 genes_text = grid_font.render(f"Genes: {genes_string} from {bin.name}", True, "#FFFFFF")
                 genes_surface = genes_text.get_rect()
                 genes_surface.topleft = (grid[0] + grid[2] + 5, state.GRID_Y + 20 + 10 * bins.index(bin))
@@ -139,12 +134,9 @@ def renderUtilities(bins, bushes, grid, surface):
         if state.RENDER_AVERAGE_GENES:
                 
                 for i in range(len(average_genes)):
-                     average_genes[i] = average_genes[i] / len(bins)
+                    average_genes[i] = average_genes[i] / len(bins)
                 clean_floats = [f"{gene:.3f}".rstrip('0').rstrip('.') if '.' in f"{gene:.3f}" else f"{gene:.3f}" for gene in average_genes]
-
                 average_genes_string = "[" + ", ".join(clean_floats) + "]"
-                
-                # 3. Render the clean string
                 average_genes_text = grid_font.render(f"Average Genes: {average_genes_string}", True, "#FFFFFF")
                 average_genes_surface = average_genes_text.get_rect()
                 average_genes_surface.topleft = (grid[0] + grid[2] + 5, state.GRID_Y + 20)
