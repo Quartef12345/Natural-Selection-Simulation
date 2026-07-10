@@ -3,7 +3,7 @@ import time
 import state
 import creatures
 import render
-
+import graphs
 
 
 #Creatures
@@ -40,7 +40,7 @@ creatures.inicializeBins(state.STARTING_BIN_AMOUNT)
 
 last_dt = time.time()
 
-
+graph = graphs.Graph(screen, [200,200,400,220], "Tick", "Population")
 while running:
 
     state.dt = time.time() - last_dt
@@ -56,10 +56,12 @@ while running:
                 running = False
 
 
-    creatures.bushesTick(state.bush_array)
-    creatures.binTick(state.bins_array, state.bush_array)
+    #creatures.bushesTick(state.bush_array)
+    #creatures.binTick(state.bins_array, state.bush_array)
 
-    render.drawScreen(state.GRID_SIZE, screen)
+    #render.drawScreen(state.GRID_SIZE, screen)
+    screen.fill("#1f304d")
+    graph.draw()
 
     # flip() the display to put your work on screen
     pygame.display.flip()

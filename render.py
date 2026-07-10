@@ -1,7 +1,6 @@
 import pygame
 import math
 
-import creatures
 import state
 
 bushes = state.bush_array #the array of the bushes objects
