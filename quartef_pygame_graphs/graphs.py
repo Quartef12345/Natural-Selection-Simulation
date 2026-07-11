@@ -1,36 +1,14 @@
 import pygame
 import math
+from . import config
+from .utils import adjust_color, format_number
 
 axis_font = pygame.font.Font('freesansbold.ttf', 11)
 graph_array = []
 
-data = {
-    "Ticks": [1],
-    "Population": [0]
-}
 
-def adjust_color(hex_color, factor=0.2):
-    hex_color = hex_color.lstrip('#')
-    
-    r = int(hex_color[0:2], 16)
-    g = int(hex_color[2:4], 16)
-    b = int(hex_color[4:6], 16)
-    
-    if factor >= 0:
-        # Darken (approach 0)
-        r = max(0, int(r * (1 - factor)))
-        g = max(0, int(g * (1 - factor)))
-        b = max(0, int(b * (1 - factor)))
-    else:
-        # Lighten (approach 255) using positive target factor
-        abs_factor = abs(factor)
-        r = min(255, int(r + (255 - r) * abs_factor))
-        g = min(255, int(g + (255 - g) * abs_factor))
-        b = min(255, int(b + (255 - b) * abs_factor))
-    
-    return f"#{r:02X}{g:02X}{b:02X}"
 
-def update_graphs():
+def update_graphs(data):
     for graph in graph_array:
         if graph.auto_update:
             graph.update_data(data)
@@ -42,13 +20,12 @@ class Graph:
     def __init__(self, surface, position, x_name, y_name_array, color_array):
         self.surface = surface
         self.position = position
-        self.axis_offset = 8
-        self.grid_position = [self.position[0] + self.axis_offset, self.position[1] + self.axis_offset, self.position[2] - 2*self.axis_offset, self.position[3] - 2*self.axis_offset ]
+        self.grid_position = [self.position[0] + config.LEFT_BORDER_SIZE, self.position[1] + config.TOP_BORDER_SIZE, self.position[2] - config.LEFT_BORDER_SIZE - config.RIGHT_BORDER_SIZE, self.position[3] - config.TOP_BORDER_SIZE - config.BOTTOM_BORDER_SIZE ]
         self.x_name = x_name
         self.y_name_array = y_name_array
         self.nr_of_variables = len(y_name_array)
         self.color_array = color_array
-        self.label_offset = 14
+        self.label_offset = config.LABEL_OFFSET
 
         self.active = False
         self.auto_update = True
@@ -70,13 +47,14 @@ class Graph:
         color_array = self.color_array
 
         if self.active:
-            pygame.draw.rect(surface, adjust_color(color_array[0], 0.4), (position[0], position[1], position[2], position[3]))
+            pygame.draw.rect(surface, adjust_color(color_array[0], 0.1), (position[0], position[1], position[2], position[3]))
             pygame.draw.rect(surface, color_array[0], (grid_position[0], grid_position[1], grid_position[2], grid_position[3])) #Background
+
+            self.draw_grid()
 
             pygame.draw.line(surface, color_array[1], (grid_position[0], grid_position[1] + grid_position[3] ), (grid_position[0] + grid_position[2],  grid_position[1] + grid_position[3] )) # X Axis
             pygame.draw.line(surface, color_array[1], (grid_position[0] , grid_position[1]), (grid_position[0],  grid_position[1] + grid_position[3])) # Y Axis
 
-            self.draw_grid()
 
             x_aixs_text = axis_font.render(f"{x_name}", True, color_array[1])
             x_axis_surface = x_aixs_text.get_rect()
@@ -87,7 +65,7 @@ class Graph:
 
                 y_axis_text = axis_font.render(f"{y_name[i]}", True, color_array[1])
                 y_axis_surface = y_axis_text.get_rect()
-                y_axis_surface.bottomright = (grid_position[0] + grid_position[2] - label_offset, grid_position[1] + grid_position[3] - label_offset * (1 + i) - 2)
+                y_axis_surface.bottomright = (grid_position[0] + grid_position[2] - label_offset, grid_position[1] + label_offset * (1 + i))
                 surface.blit(y_axis_text, y_axis_surface) #the caption for the current metric
 
                 square_label_size = y_axis_surface.height   #a professionaly looking square to serve has a colored label
@@ -127,9 +105,6 @@ class Graph:
 
             bigger_x = self.bigger_x
             bigger_y = self.bigger_y
-          
-            usable_width = self.grid_position[2]
-            usable_heigth = self.grid_position[3]
 
             if bigger_x <= 0:
                 bigger_x = 1
@@ -137,21 +112,19 @@ class Graph:
             x_axis_magnitude = 10 ** exponent   #the closest number of base 10, used to set the referencial
             
             # If the magnitude is too large for the step scale (e.g. 1000 for 2500), lower it by one order
-            if bigger_x / x_axis_magnitude < 3.5 and x_axis_magnitude >= 10:
+            if bigger_x / x_axis_magnitude < config.MAGNITUDE_LIMIT and x_axis_magnitude >= 10:
                 grid_step_x = x_axis_magnitude // 10
             else:
                 grid_step_x = x_axis_magnitude
             
-            pixel_per_unit_x = usable_width / bigger_x
+            pixel_per_unit_x = self.grid_position[2] / bigger_x
 
             virtual_step = grid_step_x//10  #a "fake" step, one magnitude lower than the real step, used to draw the auiliar lines
             if virtual_step <= 0: #for example, if magnitude is 100, then the virtual step is 10, each real step will be divided into 10 virtual steps
                 virtual_step = 1
             for grid_value in range(virtual_step, int(bigger_x) + 1, virtual_step):
                 grid_pixel_x = base_x + (grid_value * pixel_per_unit_x)
-                if grid_value%grid_step_x == 0:
-                    pygame.draw.line(self.surface, adjust_color(self.color_array[1], -0.2), (grid_pixel_x, base_y), (grid_pixel_x, self.grid_position[1]))
-                else:
+                if grid_value%grid_step_x != 0:
                     pygame.draw.line(self.surface, adjust_color(self.color_array[1], -0.8), (grid_pixel_x, base_y), (grid_pixel_x, self.grid_position[1]))
 
 
@@ -161,26 +134,61 @@ class Graph:
             exponent = math.floor(math.log10(bigger_y))
             y_axis_magnitude = 10 ** exponent   #the closest number of base 10, used to set the referencial
 
-            max_y = int(y_axis_magnitude * ((bigger_y + y_axis_magnitude)//y_axis_magnitude))
+            max_y = int(y_axis_magnitude * ((bigger_y + y_axis_magnitude)//y_axis_magnitude)) #the biggest value the graph shows - not necesserly included in the data set
             if max_y <= 0:
                 max_y = 1
             # If the magnitude is too large for the step scale (e.g. 1000 for 2500), lower it by one order
-            if bigger_y / y_axis_magnitude < 3.5 and y_axis_magnitude >= 10:
+            if bigger_y / y_axis_magnitude < config.MAGNITUDE_LIMIT and y_axis_magnitude >= 10:
                 grid_step_y = y_axis_magnitude // 10
             else:
                 grid_step_y = y_axis_magnitude
             
-            pixel_per_unit_y = usable_heigth / max_y
+            pixel_per_unit_y = self.grid_position[3] / max_y
 
             virtual_step = grid_step_y//10  #a "fake" step, one magnitude lower than the real step, used to draw the auiliar lines
             if virtual_step <= 0: #for example, if magnitude is 100, then the virtual step is 10, each real step will be divided into 10 virtual steps
                 virtual_step = 1
-            for grid_value in range(virtual_step, max_y, virtual_step):
+            for grid_value in range(virtual_step, max_y + 1, virtual_step):
                 grid_pixel_y = base_y - (grid_value * pixel_per_unit_y)
                 if grid_value%grid_step_y == 0:
                     pygame.draw.line(self.surface, adjust_color(self.color_array[1], -0.2), (base_x, grid_pixel_y), (base_x + self.grid_position[2], grid_pixel_y))
+
+                    y_number_text = axis_font.render(f"{format_number(grid_value)}", True, self.color_array[1])
+                    y_number_surface = y_number_text.get_rect()
+                    y_number_surface.center = (self.grid_position[0] - config.LEFT_AXIS_NUMBER_PADDING, grid_pixel_y)
+                    self.surface.blit(y_number_text, y_number_surface) #the caption for the x axis numbers
+
+
                 else:
                     pygame.draw.line(self.surface, adjust_color(self.color_array[1], -0.8), (base_x, grid_pixel_y), (base_x + self.grid_position[2], grid_pixel_y))    
+
+
+            #redraws the main x-grid because the sub y-grid was being drawn on top of the main x-grid
+            virtual_step = grid_step_x//10  #a "fake" step, one magnitude lower than the real step, used to draw the auxiliar lines
+            if virtual_step <= 0: #for example, if magnitude is 100, then the virtual step is 10, each real step will be divided into 10 virtual steps
+                virtual_step = 1
+            for grid_value in range(virtual_step, int(bigger_x) + 1, virtual_step):
+                grid_pixel_x = base_x + (grid_value * pixel_per_unit_x)
+                if grid_value%grid_step_x == 0:
+                    pygame.draw.line(self.surface, adjust_color(self.color_array[1], -0.2), (grid_pixel_x, base_y), (grid_pixel_x, self.grid_position[1]))
+                    
+                    x_number_text = axis_font.render(f"{grid_value}", True, self.color_array[1])
+                    x_number_surface = x_number_text.get_rect()
+                    x_number_surface.center = (grid_pixel_x, self.grid_position[1] + self.grid_position[3] + config.TOP_AXIS_NUMBER_PADDING)
+                    self.surface.blit(x_number_text, x_number_surface) #the caption for the x axis numbers
+
+            grid_value = bigger_x                       #the last line is a one of a kind, because is not in the magnitude of the steps, so it needs to be drawn seperatly
+            grid_pixel_x = base_x + (grid_value * pixel_per_unit_x)
+            pygame.draw.line(self.surface, adjust_color(self.color_array[1], -0.2), (grid_pixel_x, base_y), (grid_pixel_x, self.grid_position[1]))
+            
+            x_number_text = axis_font.render(f"{grid_value:.1f}", True, self.color_array[1])
+            x_number_surface = x_number_text.get_rect()
+            x_number_surface.center = (grid_pixel_x, self.grid_position[1] + self.grid_position[3] + config.TOP_AXIS_NUMBER_PADDING)
+            self.surface.blit(x_number_text, x_number_surface) #the caption for the x axis numbers
+    def draw_data(self):
+        for data_set in self.data_points_array:
+            pass
+
 
 
 

@@ -60,7 +60,7 @@ def renderFruits(bush, grid, surface):
         pygame.draw.circle(surface, "#c95414",  (fruit_x, fruit_y), fruits_radius*0.9)#center
         i += 1
 
-def renderPanel(bins, bushes, grid, surface):
+def renderPanel(bins, bushes, grid, surface):   #information panels
         
         #Population
         population_text = grid_font.render(f"Population: {len(bins)}", True, "#FFFFFF")
@@ -68,7 +68,8 @@ def renderPanel(bins, bushes, grid, surface):
         population_surface.center = (grid[0] + grid[2] + 20, state.GRID_Y)
         surface.blit(population_text, population_surface)
 
-def renderUtilities(bins, bushes, grid, surface):
+
+def renderUtilities(bins, bushes, grid, surface):       #Debug Texts
 
         average_genes = []
 
