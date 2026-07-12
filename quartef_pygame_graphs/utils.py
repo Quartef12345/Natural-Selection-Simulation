@@ -34,3 +34,9 @@ def adjust_color(hex_color, factor=0.2):
         b = min(255, int(b + (255 - b) * abs_factor))
     
     return f"#{r:02X}{g:02X}{b:02X}"
+
+def render_text(font, text, color, x, y, surface):
+    text = font.render(text, True, color)
+    text_surface = text.get_rect()
+    text_surface.center = (x, y)
+    surface.blit(text, text_surface) #the caption for the x axis numbers

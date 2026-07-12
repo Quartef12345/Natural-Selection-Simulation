@@ -21,11 +21,13 @@ last_dt = time.time()
 data = {
     "Time": [1],
     "Population": [0],
-    "Test":[0]
+    "Max Population":[0]
 }
 
-graph = qpg.Graph(screen, [50,50,600,340], "Time", ["Population", "Test"], ["#FFFFFF", "#111111", "#5555FF", "#B22E2E"])
+graph = qpg.Graph(screen, [state.GRID_X + state.GRID_WIDTH + 5, state.GRID_Y + 40, 450,235], "Time", ["Population", "Max Population"], ["#FFFFFF", "#111111", "#5555FF", "#B22E2E"])
 graph.active = True
+
+max_pop = 0
 
 while running:
 
@@ -42,13 +44,20 @@ while running:
                 running = False
 
 
-    #creatures.bushesTick(state.bush_array)
-    #creatures.binTick(state.bins_array, state.bush_array)
+    creatures.bushesTick(state.bush_array)
+    creatures.binTick(state.bins_array, state.bush_array)
 
-    #render.drawScreen(state.GRID_SIZE, screen)
-    screen.fill("#1f304d")
+    render.drawScreen(state.GRID_SIZE, screen)
+
+    population = len(state.bins_array)
+    if population > max_pop:
+        max_pop = population
+
     data["Time"].append(data["Time"][-1] + state.dt)
-    data["Population"].append(data["Population"][-1] + 1000000000000000 * state.dt)
+    data["Population"].append(population)
+    data["Max Population"].append(max_pop)
+
+
     qpg.update_graphs(data)
 
     # flip() the display to put your work on screen

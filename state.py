@@ -94,7 +94,7 @@ MAX_MUTATION_VARIANCE = 1.05
 
 #Simulation Constants
 BUSH_AMOUNT = 200
-STARTING_BIN_AMOUNT = 100
+STARTING_BIN_AMOUNT = 37
 
 bins_array = []
 bush_array = []

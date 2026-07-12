@@ -3,10 +3,10 @@
 
 LABEL_OFFSET = 14       #the distance betwen 2 labels
 
-TOP_BORDER_SIZE = 16        #the size of the border around the graph
-RIGHT_BORDER_SIZE = 16        #the size of the border around the graph
+TOP_BORDER_SIZE = 8        #the size of the border around the graph
+RIGHT_BORDER_SIZE = 8        #the size of the border around the graph
 BOTTOM_BORDER_SIZE = 16        #the size of the border around the graph
-LEFT_BORDER_SIZE = 32        #the size of the border around the graph
+LEFT_BORDER_SIZE = 20        #the size of the border around the graph
 
 TOP_AXIS_NUMBER_PADDING = 8 #the space betwen the numbers from the axis to the axis itself
 LEFT_AXIS_NUMBER_PADDING = 12
