@@ -19,9 +19,9 @@ creatures.inicializeBins(state.STARTING_BIN_AMOUNT)
 last_dt = time.time()
 
 data = {
-    "Time": [1],
-    "Population": [0],
-    "Max Population":[0]
+    "Time": [],
+    "Population": [],
+    "Max Population":[]
 }
 
 graph = qpg.Graph(screen, [state.GRID_X + state.GRID_WIDTH + 5, state.GRID_Y + 40, 450,235], "Time", ["Population", "Max Population"], ["#FFFFFF", "#111111", "#5555FF", "#B22E2E"])
@@ -53,7 +53,10 @@ while running:
     if population > max_pop:
         max_pop = population
 
-    data["Time"].append(data["Time"][-1] + state.dt)
+    if len(data["Time"]) == 0:
+        data["Time"].append(state.dt)
+    else:
+        data["Time"].append(data["Time"][-1] + state.dt)
     data["Population"].append(population)
     data["Max Population"].append(max_pop)
 

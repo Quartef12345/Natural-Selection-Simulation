@@ -2,6 +2,7 @@ import pygame
 import math
 from . import config
 from .utils import adjust_color, format_number, render_text
+from .data_process import raw_data, process_raw_data
 
 axis_font = pygame.font.Font('freesansbold.ttf', 11)
 graph_array = []
@@ -17,15 +18,44 @@ def update_graphs(data):
 
 
 class Graph:
-    def __init__(self, surface, position, x_name, y_name_array, color_array):
+    def __init__(self, surface, position, x_name, y_name_array, color_array, config_settings = None):
         self.surface = surface
         self.position = position
-        self.grid_position = [self.position[0] + config.LEFT_BORDER_SIZE, self.position[1] + config.TOP_BORDER_SIZE, self.position[2] - config.LEFT_BORDER_SIZE - config.RIGHT_BORDER_SIZE, self.position[3] - config.TOP_BORDER_SIZE - config.BOTTOM_BORDER_SIZE ]
+
+
+        if config_settings != None and config_settings["LEFT_BORDER_SIZE"] != None:
+            self.left_border_size = config_settings["LEFT_BORDER_SIZE"]
+        else:
+            self.left_border_size = config.LEFT_BORDER_SIZE
+
+        if config_settings != None and config_settings["TOP_BORDER_SIZE"] != None:
+            self.top_border_size = config_settings["TOP_BORDER_SIZE"]
+        else:
+            self.top_border_size = config.TOP_BORDER_SIZE
+
+
+        if config_settings != None and config_settings["RIGHT_BORDER_SIZE"] != None:
+            self.right_border_size = config_settings["RIGHT_BORDER_SIZE"]
+        else:
+            self.right_border_size = config.RIGHT_BORDER_SIZE
+
+
+        if config_settings != None and config_settings["BOTTOM_BORDER_SIZE"] != None:
+            self.bottom_border_size = config_settings["BOTTOM_BORDER_SIZE"]
+        else:
+            self.bottom_border_size = config.BOTTOM_BORDER_SIZE
+
+
+        self.grid_position = [self.position[0] + self.left_border_size, self.position[1] + self.top_border_size, self.position[2] - self.left_border_size - self.right_border_size, self.position[3] - self.top_border_size - self.bottom_border_size ]
         self.x_name = x_name
         self.y_name_array = y_name_array
         self.nr_of_variables = len(y_name_array)
         self.color_array = color_array
-        self.label_offset = config.LABEL_OFFSET
+
+        if config_settings != None and config_settings["LABEL_OFFSET"] != None:
+            self.label_offset = config_settings["LABEL_OFFSET"]
+        else:
+            self.label_offset = config.LABEL_OFFSET
 
         self.active = False
         self.auto_update = True
@@ -56,10 +86,8 @@ class Graph:
             pygame.draw.line(surface, color_array[1], (grid_position[0] , grid_position[1]), (grid_position[0],  grid_position[1] + grid_position[3])) # Y Axis
 
 
-            x_aixs_text = axis_font.render(f"{x_name}", True, color_array[1])
-            x_axis_surface = x_aixs_text.get_rect()
-            x_axis_surface.bottomright = (grid_position[0] + grid_position[2], grid_position[1] + grid_position[3])
-            surface.blit(x_aixs_text, x_axis_surface) #the caption for the x axis
+            #the caption for the x axis
+            render_text(axis_font, f"{x_name}", color_array[1], grid_position[0] + grid_position[2], grid_position[1] + grid_position[3], surface)
 
             for i in range(self.nr_of_variables):
 
@@ -76,28 +104,9 @@ class Graph:
 
     def update_data(self, data):
 
-        x_data = data[self.x_name] #the data for the x axis, retrieved from the universal data dictionaiy, and uses the x axis name of the graph as key for the dictionary
+        raw_points_array = raw_data(self, data)
 
-        y_data_array = [] #the set of the diferent y datas, each elemnt is a diferent metric
-        for y_name in self.y_name_array:
-            y_data_array.append(data[y_name])
-
-        mixed_y_data = [] #every raw number mixed in one array
-        for y_data in y_data_array:
-            for point in y_data:
-                mixed_y_data.append(point)
-
-        self.bigger_y = max(mixed_y_data)    #the biggest of all of the metrics, used to set the referencial on the graph
-        self.bigger_x = max(x_data)          #the biggest of all of x data, used to set the referencial on the graph
-
-        data_points_array = []          #the set of all of the points to be drawn on the graph, each element is an array of points, each element is a diferent metric
-
-        for metric in y_data_array:
-            data_points = []
-            for i in range(len(x_data)):
-                if len(metric) > i:
-                    data_points.append((x_data[i], metric[i])) #a single point, on one of the metrics
-            data_points_array.append(data_points) #adds the data points of this metric to the data points array
+        data_points_array = process_raw_data(self, raw_points_array)
         
         self.data_points_array = data_points_array
 
@@ -164,7 +173,7 @@ class Graph:
             grid_pixel_y = base_y - (grid_value * y_grid_values[2])
             if grid_value % y_grid_values[0] == 0:
                 pygame.draw.line(self.surface, adjust_color(color_array[1], -0.2), (base_x, grid_pixel_y), (base_x + width, grid_pixel_y))
-                render_text(axis_font, f"{grid_value:.1f}", color_array[1], base_x - config.LEFT_AXIS_NUMBER_PADDING, grid_pixel_y, self.surface)
+                render_text(axis_font, f"{format_number(grid_value)}", color_array[1], base_x - config.LEFT_AXIS_NUMBER_PADDING, grid_pixel_y, self.surface)
             else:
                 pygame.draw.line(self.surface, adjust_color(color_array[1], -0.8), (base_x, grid_pixel_y), (base_x + width, grid_pixel_y))    
 
@@ -174,7 +183,7 @@ class Graph:
             grid_pixel_x = base_x + (grid_value * x_grid_values[2])
             if grid_value % x_grid_values[0] == 0:
                 pygame.draw.line(self.surface, adjust_color(color_array[1], -0.2), (grid_pixel_x, base_y), (grid_pixel_x, origin_y))
-                render_text(axis_font, f"{grid_value:.1f}", color_array[1], grid_pixel_x, origin_y + height + config.TOP_AXIS_NUMBER_PADDING, self.surface)
+                render_text(axis_font, f"{format_number(grid_value)}", color_array[1], grid_pixel_x, origin_y + height + config.TOP_AXIS_NUMBER_PADDING, self.surface)
 
         grid_value = bigger_x                       #the last line is a one of a kind, because is not in the magnitude of the steps, so it needs to be drawn seperatly
         grid_pixel_x = base_x + (grid_value * x_grid_values[2])
