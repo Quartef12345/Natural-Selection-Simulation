@@ -21,15 +21,18 @@ last_dt = time.time()
 data = {
     "Time": [],
     "Population": [],
-    "Max Population":[]
+    "Max Population":[],
+    "Delta Time":[]
 }
 
-graph = qpg.Graph(screen, [state.GRID_X + state.GRID_WIDTH + 5, state.GRID_Y + 40, 450,235], "Time", ["Population", "Max Population"], ["#FFFFFF", "#111111", "#5555FF", "#B22E2E"])
+graph = qpg.Graph(screen, [state.GRID_X + state.GRID_WIDTH + 5, state.GRID_Y + 40, 450,235], "Time", [ "Delta Time", "Population", "Max Population"], ["#FFFFFF", "#111111", "#5555FF", "#B22E2E", "#24D43B"], "index_jump")
 graph.active = True
 
 max_pop = 0
 
 while running:
+
+
 
     state.dt = time.time() - last_dt
     last_dt = time.time()
@@ -57,11 +60,15 @@ while running:
         data["Time"].append(state.dt)
     else:
         data["Time"].append(data["Time"][-1] + state.dt)
-    data["Population"].append(population)
+
+    data["Population"].append(population) 
     data["Max Population"].append(max_pop)
 
+    data["Delta Time"].append(state.dt * 1000)
 
-    qpg.update_graphs(data)
+
+    data = qpg.update_graphs(data)
+
 
     # flip() the display to put your work on screen
     pygame.display.flip()

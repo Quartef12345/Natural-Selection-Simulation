@@ -1,8 +1,8 @@
 import pygame
 import math
-from . import config
+from .import config
 from .utils import adjust_color, format_number, render_text
-from .data_process import raw_data, process_raw_data
+from .data_process import raw_data, process_raw_data, compress_points_data, compress_data, formatting_data
 
 axis_font = pygame.font.Font('freesansbold.ttf', 11)
 graph_array = []
@@ -15,10 +15,26 @@ def update_graphs(data):
             graph.update_data(data)
         if graph.active:
             graph.draw()
+        return data #universal_data_comression(data, 100, "all", "value_jump")
+
+def universal_data_comression(data, density, metric = "all", compression_method = "value_jump"):
+    if metric == "all":
+        return compress_data(data, density, compression_method)
+    else:
+        compressing_data = {metric: data[metric]}
+        compressed_data = compress_data(compressing_data, density, compression_method)
+
+        data[metric] = compressed_data[metric]
+
+        return data
+    
+
+
+        
 
 
 class Graph:
-    def __init__(self, surface, position, x_name, y_name_array, color_array, config_settings = None):
+    def __init__(self, surface, position, x_name, y_name_array, color_array, compression_method = "index_jump", config_settings = None):
         self.surface = surface
         self.position = position
 
@@ -51,6 +67,8 @@ class Graph:
         self.y_name_array = y_name_array
         self.nr_of_variables = len(y_name_array)
         self.color_array = color_array
+
+        self.compression_method = compression_method
 
         if config_settings != None and config_settings["LABEL_OFFSET"] != None:
             self.label_offset = config_settings["LABEL_OFFSET"]
@@ -106,9 +124,15 @@ class Graph:
 
         raw_points_array = raw_data(self, data)
 
-        data_points_array = process_raw_data(self, raw_points_array)
-        
+        compressed_data = compress_points_data(raw_points_array, 100, self.compression_method)
+
+        data_points_array = process_raw_data(compressed_data)
+
         self.data_points_array = data_points_array
+
+        formated_data = formatting_data(compressed_data, ["Time", "Delta Time"])
+
+        return formated_data
 
     def calculate_grid(self, biggest_value, usable_distance):
 
