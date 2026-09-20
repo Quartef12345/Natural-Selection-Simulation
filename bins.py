@@ -99,8 +99,7 @@ class Bin:
 
                 self.energy -= energy_for_pregnancy
         else:
-            self.refractory_timer += state.dt
-                
+            self.refractory_timer += state.dt            
 
     def digest(self):       #Function to determine the digesting energy of createures, the higher the metabolism he faster creaturs get usable energy, but the less efficient it is
         if self.raw_energy > 0:

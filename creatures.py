@@ -5,6 +5,14 @@ import state
 import bins
 import bush
 
+def get_average_genes(bin_array):
+    average_genes = []
+    for n in range(len(bin_array[0].genes)):
+        total_gene = 0
+        for bin in bin_array:
+            total_gene += bin.genes[n]
+        average_genes.append(total_gene/len(bin_array))
+    return average_genes
 
 def inicializeBushes(nr_of_bushes):
     i = 0

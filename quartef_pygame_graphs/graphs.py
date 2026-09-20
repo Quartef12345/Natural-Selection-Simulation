@@ -1,40 +1,49 @@
 import pygame
 import math
+import copy
 from .import config
 from .utils import adjust_color, format_number, render_text
-from .data_process import raw_data, process_raw_data, compress_points_data, compress_data, formatting_data
+from .data_process import raw_data, process_raw_data, compress_data, formatting_data
 
 axis_font = pygame.font.Font('freesansbold.ttf', 11)
 graph_array = []
-
-
-
-def update_graphs(data):
-    for graph in graph_array:
-        if graph.auto_update:
-            graph.update_data(data)
-        if graph.active:
-            graph.draw()
-        return data #universal_data_comression(data, 100, "all", "value_jump")
-
-def universal_data_comression(data, density, metric = "all", compression_method = "value_jump"):
-    if metric == "all":
-        return compress_data(data, density, compression_method)
-    else:
-        compressing_data = {metric: data[metric]}
-        compressed_data = compress_data(compressing_data, density, compression_method)
-
-        data[metric] = compressed_data[metric]
-
-        return data
     
 
+class DataGroup:
+    def __init__(self, x_data_info, y_data_dic, density, compression_method, graph_references_array):
+        self.data = {
+            "x": x_data_info,
+            "y_dic": y_data_dic
+        }
+        self.original_data = copy.deepcopy(self.data)
+        self.density = density
+        self.compression_method = compression_method
+        self.graph_references_array = graph_references_array
 
-        
+    def update_data(self):
+        self.data = compress_data(self.data, self.original_data, self.density, self.compression_method)
 
+    def update_graphs(self):
+        for graph in self.graph_references_array:
+            graph.update_data(self.data)
+
+    def add_graph(self, graph):
+        self.graph_references_array.append(graph)
+
+    def draw_data_group(self):
+        for graph in self.graph_references_array:
+            if graph.active:
+                graph.draw()
+    def add_data(self, metric, new_data):
+        if metric == "x":
+            self.data["x"][1].append(new_data)
+            self.original_data["x"][1].append(new_data)
+        else:
+            self.data["y_dic"][metric].append(new_data)
+            self.original_data["y_dic"][metric].append(new_data)
 
 class Graph:
-    def __init__(self, surface, position, x_name, y_name_array, color_array, compression_method = "index_jump", config_settings = None):
+    def __init__(self, surface, position, data_group, color_array, config_settings = None):
         self.surface = surface
         self.position = position
 
@@ -63,12 +72,14 @@ class Graph:
 
 
         self.grid_position = [self.position[0] + self.left_border_size, self.position[1] + self.top_border_size, self.position[2] - self.left_border_size - self.right_border_size, self.position[3] - self.top_border_size - self.bottom_border_size ]
-        self.x_name = x_name
-        self.y_name_array = y_name_array
-        self.nr_of_variables = len(y_name_array)
+        self.x_dic = data_group.data["x"]
+        self.y_dic = data_group.data["y_dic"]
+        self.nr_of_variables = len(data_group.data["y_dic"])
         self.color_array = color_array
 
-        self.compression_method = compression_method
+        self.data_group = data_group
+        data_group.add_graph(self)
+
 
         if config_settings != None and config_settings["LABEL_OFFSET"] != None:
             self.label_offset = config_settings["LABEL_OFFSET"]
@@ -89,8 +100,8 @@ class Graph:
         surface = self.surface
         position = self.position
         grid_position = self.grid_position
-        x_name = self.x_name
-        y_name = self.y_name_array
+        x_data = self.data_group.data["x"]
+        y_dic = self.data_group.data["y_dic"]
         label_offset = self.label_offset
         color_array = self.color_array
 
@@ -105,11 +116,12 @@ class Graph:
 
 
             #the caption for the x axis
-            render_text(axis_font, f"{x_name}", color_array[1], grid_position[0] + grid_position[2], grid_position[1] + grid_position[3], surface)
+            render_text(axis_font, f"{x_data[0]}", color_array[1], grid_position[0] + grid_position[2], grid_position[1] + grid_position[3], surface)
 
+            y_names = list(y_dic.keys())
             for i in range(self.nr_of_variables):
 
-                y_axis_text = axis_font.render(f"{y_name[i]}", True, color_array[1])
+                y_axis_text = axis_font.render(f"{y_names[i]}", True, color_array[1])
                 y_axis_surface = y_axis_text.get_rect()
                 y_axis_surface.bottomright = (grid_position[0] + grid_position[2] - label_offset, grid_position[1] + label_offset * (1 + i))
                 surface.blit(y_axis_text, y_axis_surface) #the caption for the current metric
@@ -124,15 +136,10 @@ class Graph:
 
         raw_points_array = raw_data(self, data)
 
-        compressed_data = compress_points_data(raw_points_array, 100, self.compression_method)
-
-        data_points_array = process_raw_data(compressed_data)
+        data_points_array = process_raw_data(raw_points_array)
 
         self.data_points_array = data_points_array
 
-        formated_data = formatting_data(compressed_data, ["Time", "Delta Time"])
-
-        return formated_data
 
     def calculate_grid(self, biggest_value, usable_distance):
 
@@ -214,7 +221,6 @@ class Graph:
         pygame.draw.line(self.surface, adjust_color(color_array[1], -0.2), (grid_pixel_x, base_y), (grid_pixel_x, origin_y))
         
         render_text(axis_font, f"{grid_value:.1f}", color_array[1], grid_pixel_x, origin_y + height + config.TOP_AXIS_NUMBER_PADDING, self.surface)
-
 
     def draw_data(self):
         data_points_array = self.data_points_array

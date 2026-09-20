@@ -18,22 +18,44 @@ creatures.inicializeBins(state.STARTING_BIN_AMOUNT)
 
 last_dt = time.time()
 
-data = {
-    "Time": [],
+simulation_info = qpg.DataGroup(["Time", []], {
     "Population": [],
-    "Max Population":[],
-    "Delta Time":[]
-}
+    "Max Population": []
+}, 200, "index_jump", [])
 
-graph = qpg.Graph(screen, [state.GRID_X + state.GRID_WIDTH + 5, state.GRID_Y + 40, 450,235], "Time", [ "Delta Time", "Population", "Max Population"], ["#FFFFFF", "#111111", "#5555FF", "#B22E2E", "#24D43B"], "index_jump")
-graph.active = True
+simulation_info_graph = qpg.Graph(screen, [state.GRID_X + state.GRID_WIDTH + 5, state.GRID_Y + 300, 450,235], simulation_info,["#FFFFFF", "#111111", "#5555FF", "#B22E2E", "#24D43B"])
+simulation_info_graph.active = True
+
+gene_info = qpg.DataGroup([["Time"], []], {
+    "Min Boring Timer": [],
+    "Max Boring Timer": [],
+
+    "Reproductive Maturity": [],
+    "Gestation Period": [],
+    "Refractory Period": [],
+
+    "Metabolism": [],
+    "Speed": [],
+    "Awareness": []
+}, 200, "index_jump", [])
+
+gene_info_graph = qpg.Graph(screen, [state.GRID_X + state.GRID_WIDTH + 5, state.GRID_Y + 40, 450,235], gene_info,[
+    "#FFFFFF",
+    "#111111", 
+    "#5555FF", 
+    "#B22E2E", 
+    "#24D43B",
+    "#FC00CE",
+    "#FFB428",
+    "#0DD7E6",
+    "#006F00",
+    "#1F030319"])
+
+gene_info_graph.active = True
 
 max_pop = 0
 
 while running:
-
-
-
     state.dt = time.time() - last_dt
     last_dt = time.time()
 
@@ -52,27 +74,43 @@ while running:
 
     render.drawScreen(state.GRID_SIZE, screen)
 
+
+
     population = len(state.bins_array)
     if population > max_pop:
         max_pop = population
 
-    if len(data["Time"]) == 0:
-        data["Time"].append(state.dt)
+
+    if len(simulation_info.data["x"][1]) == 0:
+        simulation_info.add_data("x", state.dt)
+        gene_info.add_data("x", state.dt)
     else:
-        data["Time"].append(data["Time"][-1] + state.dt)
+        simulation_info.add_data("x", simulation_info.original_data["x"][1][-1] + state.dt)
+        gene_info.add_data("x", gene_info.original_data["x"][1][-1] + state.dt)
 
-    data["Population"].append(population) 
-    data["Max Population"].append(max_pop)
+    simulation_info.add_data("Population", population)
+    simulation_info.add_data("Max Population", max_pop)
 
-    data["Delta Time"].append(state.dt * 1000)
+    gene_info.add_data("Min Boring Timer", creatures.get_average_genes(state.bins_array)[0])
+    gene_info.add_data("Max Boring Timer", creatures.get_average_genes(state.bins_array)[1])
+    gene_info.add_data("Reproductive Maturity", creatures.get_average_genes(state.bins_array)[2])
+    gene_info.add_data("Gestation Period", creatures.get_average_genes(state.bins_array)[3])
+    gene_info.add_data("Refractory Period", creatures.get_average_genes(state.bins_array)[4])
+    gene_info.add_data("Metabolism", creatures.get_average_genes(state.bins_array)[5])
+    gene_info.add_data("Speed", creatures.get_average_genes(state.bins_array)[6])
+    gene_info.add_data("Awareness", creatures.get_average_genes(state.bins_array)[7])
 
 
-    data = qpg.update_graphs(data)
+    simulation_info.update_data()
+    simulation_info.update_graphs()
+    simulation_info.draw_data_group()
 
+    gene_info.update_data()
+    gene_info.update_graphs()
+    gene_info.draw_data_group()
 
     # flip() the display to put your work on screen
     pygame.display.flip()
-
     clock.tick(120)  # limits FPS to 120
 
 pygame.quit()
