@@ -15,15 +15,25 @@ creatures.inicializeBins(state.STARTING_BIN_AMOUNT)
 
 # pygame setup
 
-
 last_dt = time.time()
+
+test_group = qpg.DataGroup(["Time", []], {
+    "Test 1": [],
+    "Test 2": [],
+}, 200, "index_jump", [])
+
+test_graph = qpg.Graph(screen, [50,50,500,200], test_group, ["#FFFFFF", "#111111", "#5555FF", "#B22E2E", "#24D43B"])
+
+test_graph.active = True
+
+"""
 
 simulation_info = qpg.DataGroup(["Time", []], {
     "Population": [],
     "Max Population": []
 }, 200, "index_jump", [])
 
-simulation_info_graph = qpg.Graph(screen, [state.GRID_X + state.GRID_WIDTH + 5, state.GRID_Y + 300, 450,235], simulation_info,["#FFFFFF", "#111111", "#5555FF", "#B22E2E", "#24D43B"])
+simulation_info_graph = qpg.Graph(screen, [state.GRID_X + state.GRID_WIDTH + 5, state.GRID_Y + 300, 225,120], simulation_info,["#FFFFFF", "#111111", "#5555FF", "#B22E2E", "#24D43B"])
 simulation_info_graph.active = True
 
 gene_info = qpg.DataGroup([["Time"], []], {
@@ -54,6 +64,9 @@ gene_info_graph = qpg.Graph(screen, [state.GRID_X + state.GRID_WIDTH + 5, state.
 gene_info_graph.active = True
 
 max_pop = 0
+"""
+test = True
+
 
 while running:
     state.dt = time.time() - last_dt
@@ -67,14 +80,39 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-
-
-    creatures.bushesTick(state.bush_array)
-    creatures.binTick(state.bins_array, state.bush_array)
+    if test:
+        time.sleep(5)
+        test = False
+    #creatures.bushesTick(state.bush_array)
+    #creatures.binTick(state.bins_array, state.bush_array)
 
     render.drawScreen(state.GRID_SIZE, screen)
 
+    if len(test_group.data["x"][1]) == 0:
+        test_group.add_data("x", state.dt)
+    else:
+        test_group.add_data("x", test_group.original_data["x"][1][-1] + state.dt)
 
+
+    if len(test_group.data["y_dic"]["Test 1"]) == 0:
+        test_group.add_data("Test 1", state.dt * 20)
+    else:
+        test_group.add_data("Test 1", test_group.original_data["y_dic"]["Test 1"][-1] + state.dt * 20)  
+
+    if len(test_group.data["y_dic"]["Test 2"]) == 0:
+        test_group.add_data("Test 2", state.dt * 10 + 20)
+    else:
+        test_group.add_data("Test 2", test_group.original_data["y_dic"]["Test 2"][-1] + state.dt * 10)  
+
+    test_group.update_data()
+    test_group.update_graphs()
+    test_group.draw_data_group()
+
+    # flip() the display to put your work on screen
+    pygame.display.flip()
+    clock.tick(120)  # limits FPS to 120
+
+"""
 
     population = len(state.bins_array)
     if population > max_pop:
@@ -109,9 +147,7 @@ while running:
     gene_info.update_graphs()
     gene_info.draw_data_group()
 
-    # flip() the display to put your work on screen
-    pygame.display.flip()
-    clock.tick(120)  # limits FPS to 120
+"""
 
 pygame.quit()
 

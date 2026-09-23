@@ -31,7 +31,8 @@ def drawScreen(grid_size,surface):
     for bush in bushes:
         renderBush(bush, grid_size, surface)
         renderFruits(bush, grid_size, surface)
-    renderPanel(bins, bushes, grid_size, surface)
+    if state.RENDER_PANEL:
+        renderPanel(bins, bushes, grid_size, surface)
     renderUtilities(bins, bushes, grid_size, surface)
 
 

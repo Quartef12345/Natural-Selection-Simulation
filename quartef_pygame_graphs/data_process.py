@@ -4,11 +4,11 @@
 
 def raw_data(self, data):
 
-    x_data = data["x"][1] #the data for the x axis, retrieved from the universal data dictionaiy, and uses the x axis name of the graph as key for the dictionary
+    x_data = data["x"][1] #the data for the x axis, retrieved from the data dictionaiy
 
 
 
-    y_data_dic = data["y_dic"] #the set of the diferent y datas, each elemnt is a diferent metric
+    y_data_dic = data["y_dic"] #the dict of the diferent y datas, each elemnt is a diferent metric
 
     mixed_y_data = [] #every raw number mixed in one array
     for y_data in y_data_dic:
@@ -32,6 +32,11 @@ def raw_data(self, data):
 
 
 def process_raw_data(data_array): 
+
+#In this fucntion is not used the original data structure of data["x"] and data["y_dic"] isntead it used 
+# a array of (x,y) arrays, where the x's are the same for all, but the y's are diferent metrics
+
+
 # Removes repeated points,
 # for example, if population is 130 for 5 seconds,
 # the data doesnt have 300 consecutive points of the same value(assuming 60 fps),
@@ -66,8 +71,8 @@ def compress_data(data, original_data, density, compression_method):   #Density 
 
     #   Planned methods:
     #   - Average Value, displays the average of all values withing jump_distance
-    compressed_y_data = {} #The final y data
-    compressed_x_data = {}
+    compressed_y_data = {} #The final data
+    compressed_x_data = []
 
     if compression_method == "index_jump":  
 
@@ -97,11 +102,11 @@ def compress_data(data, original_data, density, compression_method):   #Density 
             for n in range(0, total_points, jump_distance):   
                 compressed_x_data.append(x_array[n]) #Adds them to the sub final result
 
-            if(x_array[-1] != compressed_x_data[-1]):
+            if(x_array[-1] != compressed_x_data[-1]): #If the last compressed point, is not the last poin in the original data, then add that point 
                 compressed_x_data.append(x_array[-1])
         
 
-    elif compression_method == "value_jump":
+    elif compression_method == "value_jump":    #NOT WORKING
         x_array = data["x"][1]
         compressed_x_data = []
         max_value = x_array[-1]
@@ -128,12 +133,14 @@ def compress_data(data, original_data, density, compression_method):   #Density 
             
     else:
         return data
-    data["x"][1] = compressed_x_data
-    data["y_dic"] = compressed_y_data
+
+    
+    data["x"][1] = compressed_x_data    #changes the data
+    data["y_dic"] = compressed_y_data   
 
     return data
 
-def formatting_data(data, labels):
+def formatting_data(data, labels):      #no longer used, it was used fore a diferent system 
     data_dic = {}
 
     x_array = []

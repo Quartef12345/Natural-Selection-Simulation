@@ -6,19 +6,18 @@ from .utils import adjust_color, format_number, render_text
 from .data_process import raw_data, process_raw_data, compress_data, formatting_data
 
 axis_font = pygame.font.Font('freesansbold.ttf', 11)
-graph_array = []
     
 
 class DataGroup:
     def __init__(self, x_data_info, y_data_dic, density, compression_method, graph_references_array):
-        self.data = {
+        self.data = {           #What data is actually gonna be use in the graphs
             "x": x_data_info,
             "y_dic": y_data_dic
         }
-        self.original_data = copy.deepcopy(self.data)
-        self.density = density
+        self.original_data = copy.deepcopy(self.data)   #A backup of all of the data
+        self.density = density  #The maximum ammount of point in a graph
         self.compression_method = compression_method
-        self.graph_references_array = graph_references_array
+        self.graph_references_array = graph_references_array #Graphs associated with this datagroup
 
     def update_data(self):
         self.data = compress_data(self.data, self.original_data, self.density, self.compression_method)
@@ -34,6 +33,7 @@ class DataGroup:
         for graph in self.graph_references_array:
             if graph.active:
                 graph.draw()
+
     def add_data(self, metric, new_data):
         if metric == "x":
             self.data["x"][1].append(new_data)
@@ -58,12 +58,10 @@ class Graph:
         else:
             self.top_border_size = config.TOP_BORDER_SIZE
 
-
         if config_settings != None and config_settings["RIGHT_BORDER_SIZE"] != None:
             self.right_border_size = config_settings["RIGHT_BORDER_SIZE"]
         else:
             self.right_border_size = config.RIGHT_BORDER_SIZE
-
 
         if config_settings != None and config_settings["BOTTOM_BORDER_SIZE"] != None:
             self.bottom_border_size = config_settings["BOTTOM_BORDER_SIZE"]
@@ -88,13 +86,10 @@ class Graph:
 
         self.active = False
         self.auto_update = True
-        self.auto_scroll = True
 
         self.data_points_array = []
         self.bigger_x = 0
         self.bigger_y = 0
-
-        graph_array.append(self)
 
     def draw(self):
         surface = self.surface
@@ -105,40 +100,31 @@ class Graph:
         label_offset = self.label_offset
         color_array = self.color_array
 
-        if self.active:
-            pygame.draw.rect(surface, adjust_color(color_array[0], 0.1), (position[0], position[1], position[2], position[3]))
-            pygame.draw.rect(surface, color_array[0], (grid_position[0], grid_position[1], grid_position[2], grid_position[3])) #Background
+        pygame.draw.rect(surface, adjust_color(color_array[0], 0.1), (position[0], position[1], position[2], position[3]))
+        pygame.draw.rect(surface, color_array[0], (grid_position[0], grid_position[1], grid_position[2], grid_position[3])) #Background
 
-            self.draw_grid()
+        self.draw_grid()
 
-            pygame.draw.line(surface, color_array[1], (grid_position[0], grid_position[1] + grid_position[3] ), (grid_position[0] + grid_position[2],  grid_position[1] + grid_position[3] )) # X Axis
-            pygame.draw.line(surface, color_array[1], (grid_position[0] , grid_position[1]), (grid_position[0],  grid_position[1] + grid_position[3])) # Y Axis
+        pygame.draw.line(surface, color_array[1], (grid_position[0], grid_position[1] + grid_position[3] ), (grid_position[0] + grid_position[2],  grid_position[1] + grid_position[3] )) # X Axis
+        pygame.draw.line(surface, color_array[1], (grid_position[0] , grid_position[1]), (grid_position[0],  grid_position[1] + grid_position[3])) # Y Axis
 
 
-            #the caption for the x axis
-            render_text(axis_font, f"{x_data[0]}", color_array[1], grid_position[0] + grid_position[2], grid_position[1] + grid_position[3], surface)
+        #the caption for the x axis
+        render_text(axis_font, f"{x_data[0]}", color_array[1], grid_position[0] + grid_position[2], grid_position[1] + grid_position[3], surface)
 
-            y_names = list(y_dic.keys())
-            for i in range(self.nr_of_variables):
+        y_names = list(y_dic.keys())
+        for i in range(self.nr_of_variables):
 
-                y_axis_text = axis_font.render(f"{y_names[i]}", True, color_array[1])
-                y_axis_surface = y_axis_text.get_rect()
-                y_axis_surface.bottomright = (grid_position[0] + grid_position[2] - label_offset, grid_position[1] + label_offset * (1 + i))
-                surface.blit(y_axis_text, y_axis_surface) #the caption for the current metric
+            y_axis_text = axis_font.render(f"{y_names[i]}", True, color_array[1])
+            y_axis_surface = y_axis_text.get_rect()
+            square_label_size = y_axis_surface.height   #a professionaly looking square to serve has a colored label
+            y_axis_surface.bottomleft = (grid_position[0] + square_label_size + label_offset, grid_position[1] + label_offset * (1 + i))
+            surface.blit(y_axis_text, y_axis_surface) #the caption for the current metric
 
-                square_label_size = y_axis_surface.height   #a professionaly looking square to serve has a colored label
-                pygame.draw.rect(surface, adjust_color(color_array[2+i], 0.5), (y_axis_surface.x - square_label_size - 3, y_axis_surface.y, square_label_size, square_label_size))
-                pygame.draw.rect(surface, color_array[2+i], (y_axis_surface.x - square_label_size - 3 + square_label_size*0.1, y_axis_surface.y + square_label_size*0.1, square_label_size*0.8, square_label_size*0.8))
+            pygame.draw.rect(surface, adjust_color(color_array[2+i], 0.5), (y_axis_surface.x - square_label_size - 3, y_axis_surface.y, square_label_size, square_label_size))
+            pygame.draw.rect(surface, color_array[2+i], (y_axis_surface.x - square_label_size - 3 + square_label_size*0.1, y_axis_surface.y + square_label_size*0.1, square_label_size*0.8, square_label_size*0.8))
 
             self.draw_data()
-
-    def update_data(self, data):
-
-        raw_points_array = raw_data(self, data)
-
-        data_points_array = process_raw_data(raw_points_array)
-
-        self.data_points_array = data_points_array
 
 
     def calculate_grid(self, biggest_value, usable_distance):
@@ -209,7 +195,7 @@ class Graph:
                 pygame.draw.line(self.surface, adjust_color(color_array[1], -0.8), (base_x, grid_pixel_y), (base_x + width, grid_pixel_y))    
 
 
-        #redraws the main x-grid because the sub y-grid was being drawn on top of the main x-grid
+        #draws the main x-grid last because the sub y-grid was being drawn on top of the main x-grid
         for grid_value in range(x_grid_values[1], int(bigger_x) + 1, x_grid_values[1]):
             grid_pixel_x = base_x + (grid_value * x_grid_values[2])
             if grid_value % x_grid_values[0] == 0:
@@ -221,6 +207,14 @@ class Graph:
         pygame.draw.line(self.surface, adjust_color(color_array[1], -0.2), (grid_pixel_x, base_y), (grid_pixel_x, origin_y))
         
         render_text(axis_font, f"{grid_value:.1f}", color_array[1], grid_pixel_x, origin_y + height + config.TOP_AXIS_NUMBER_PADDING, self.surface)
+
+    def update_data(self, data):
+
+        raw_points_array = raw_data(self, data)
+
+        data_points_array = process_raw_data(raw_points_array)
+
+        self.data_points_array = data_points_array
 
     def draw_data(self):
         data_points_array = self.data_points_array
